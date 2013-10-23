@@ -4,15 +4,19 @@
     <h1>Indtast basisinformation</h1>
         
     Kode: <strong>{{ code }}</strong><br>
-    <form method="post">
+    <form method="post" id="myform">
         {% csrf_token %}
-        <input type="hidden" name="code" value="{{ code }} id="name">
-        Navn: <input type="text" name="name" onkeypress="update();"><br>
+        <input type="hidden" name="code" value="{{ code }}" id="name">
+        Navn: <input type="text" name="name" id="nameID" onkeyup="update();"><br>
         Fødselsår: 
-        <select name="year" id="year">
+        <select name="year" id="yearID" onchange="update();">
+            <option value="pick">Vælg årstal</option>
         </select><br>
-        Køn: <input type="radio" name="sex" value="male">Mand &nbsp;<input type="radio" name="sex" value="female">Kvinde</br>
-        <INPUT type="button" onclick="document.location = document.location;" value="Tilbage"> <INPUT type="submit" value="Bekræft"> 
+        
+        Køn: <input type="radio" name="sex" value="M" onchange="update();">Mand &nbsp;
+             <input type="radio" name="sex" value="F" onchange="update();">Kvinde</br>
+        
+        <INPUT type="submit" value="Bekræft" id="submitID" disabled> 
     </form>
 
 {% endblock %}
@@ -23,15 +27,28 @@
     //Populate year with 100 possibilities
     for(var i = 2013; i > 1913;i--)
     {
-        $("#year").append('<option value="'+i+'">'+i+'</option>');
+        $("#yearID").append('<option value="'+i+'" onkeyup="update();">'+i+'</option>');
     }
+
     function update()
     {
-        var name = $("#name");
-        var year = $("#name");
+        var name = $("#nameID").val();
+        var year = $("#yearID").val();
+        var sex = $('input[name=sex]:checked', '#myform').val();
+        
         
 
-        //alert(name.balue);
+        if(year == "pick" || name.length == 0 || sex == undefined)
+        {
+            $('#submitID').attr('disabled', 'disabled');
+        }
+        else
+        {
+            $('#submitID').removeAttr('disabled');
+        }
+
+
+        
     }
     update();
     

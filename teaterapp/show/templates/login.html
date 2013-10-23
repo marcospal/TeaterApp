@@ -3,13 +3,21 @@
 {% block body %}
     <form method="post">
         {% csrf_token %}
-        Kode: <input type="text" onkeypress="extend();" name="code"><br>
+        Kode: <input type="text" name="code" id="codeID" maxlength="6"><br>
     </form>
+
+<h1>{{ test }}</h1>
+
 
 {% endblock %}
 
 
 {% block javascript %}
+
+//Force uppercase and only A-Z & 0-9
+$("#codeID").keyup(function(){
+    this.value = this.value.toUpperCase().replace(/\W/g, '');
+});
 
 {% endblock %}
 

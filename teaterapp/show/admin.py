@@ -14,7 +14,34 @@ class LocationAdmin(admin.ModelAdmin):
 admin.site.register(Location, LocationAdmin)
 
 
-class ParticipantAdmin(admin.ModelAdmin):
-    ordering = ('active', 'code',)
+class ProfileAdmin(admin.ModelAdmin):
+    ordering = ('active', )
     search_fields = ('code',)
-admin.site.register(Participant, ParticipantAdmin)
+admin.site.register(Profile, ProfileAdmin)
+
+class RatingAdmin(admin.ModelAdmin):
+    ordering = ('value', )
+admin.site.register(Rating, RatingAdmin)
+
+
+
+class AnswerInline(admin.TabularInline):
+    model = Answer
+    fk_name = 'question' #or 'world', as applicable.
+    extra=1
+
+class QuestionAdmin(admin.ModelAdmin):
+    ordering = ('id', )
+    search_fields = ('text',)
+    inlines = [
+        AnswerInline,
+    ]
+admin.site.register(Question, QuestionAdmin)
+
+
+
+
+#class AnswerAdmin(admin.ModelAdmin):
+#    ordering = ('id', )
+#    search_fields = ('text',)
+#admin.site.register(Answer, AnswerAdmin)

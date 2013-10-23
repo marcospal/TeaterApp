@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+{{ question.text }}
+
+<form method="post">
+
+    {% csrf_token %}
+    <input type="hidden" name="question" value="{{ question.id }}">
+        
+    {% for a in question.possible_answers.all %}
+         <INPUT type="submit" value="{{ a.text }}" name="answer"> 
+    {% endfor %}
+</form>
+    
+{% endblock %}
+
+
+{% block javascript %}
+
+{% endblock %}
+
+
+
