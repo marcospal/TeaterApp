@@ -8,6 +8,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.contrib.admin.views.decorators import staff_member_required
 import re
+import datetime
+
 
 from models import Profile, Question, Rating
 
@@ -95,16 +97,23 @@ def baseinfo(request):
         pass
 
     try:
+        print request.POST
+
         _code = request.POST['code'];
         _name = request.POST['name'];
         _sex = request.POST['sex'];
+        _day = int(float(request.POST['day'])) ;
+        _month = int(float(request.POST['month'])) ;
         _year = int(float(request.POST['year'])) ;
+
+        print datetime.date(_year,_month,_day) 
+
 
         for a,b in Profile.GENDERS:
             if b == _sex:
                 _sex = a
         
-        profile = Profile(user=request.user, name=_name, year_of_birth=_year, gender=_sex)
+        profile = Profile(user=request.user, name=_name, birth=datetime.date(_year,_month,_day) , gender=_sex)
         profile.save()
         return HttpResponseRedirect('/')
     except:
@@ -132,66 +141,77 @@ def quiz(request):
     except:
         return HttpResponseRedirect('/')
     
-    print request.POST
+    #print request.POST
 
     #recieve answers
     try:
         question = int(float(request.POST["question"]))
         answer = request.POST["answer"]
-
         question = Question.objects.get(id=question)
-        for a in question.possible_answers.all():
-            if a.text == answer:
-                _profile.question = a.next_question
-                _profile.given_answers.add(a)
-                
-                print "a"
-                if a.scale != None:
-                    print "b"
-                    r = None
-                    try:
-                        print "c"
-                        r = Rating.objects.get(profile=_profile, scale=a.scale)
-                        print "done.."
+        
+        if question == _profile.question:
+            for a in question.possible_answers.all():
+                if a.text == answer:
+                    _profile.question = a.next_question
+                    _profile.given_answers.add(a)
+                    _profile.answered_questions.add(question)
+                    if a.scale != None:
+                        r = None
+                        try:
+                            r = Rating.objects.get(profile=_profile, scale=a.scale)
+                        except:
+                            r = Rating(profile=_profile, scale=a.scale)
+                        r.value += a.modifier
+                        r.save()
+                        print "done"
 
-                    except:
-                        print "def"
-                    
-                        r = Rating(profile=_profile, scale=a.scale)
-                        print "aaa"
-                    r.value += a.modifier
-                    r.save()
-                    print "done"
-
-                _profile.force_questions -= 1
-                _profile.save();
-                print "Answered %s" % (a.text)
-                break
-        #Attempt to answer question
-        pass
+                    _profile.force_questions -= 1
+                    _profile.save();
+                    print "Answered %s" % (a.text)
+                    break
+        else:
+            print "answering non pending question"
     except:
         pass
 
 
-
+    #Find what question to ask
     q = None
 
-    if _profile.question:
-        q = _profile.question
-    else:
+    #is a question assigned 
+    if not _profile.question:
+        #possibly send back to root 
+        prfl = [_profile]
         qlist = Question.objects.filter(can_start=True)
         
-        #order list so questions answered before has lowest rank
+
+        print qlist
+        
+        for s in qlist:
+            print s, s.getscore(_profile)
 
 
-        if len(qlist) == 0:
-            print "no more questions"
-        q = qlist[0]
+        def score(a,b):
+            return a.getscore(_profile) < b.getscore(_profile)
+
+
+        qlist = sorted(qlist, score)
+
+        for s in qlist:
+            print s, s.getscore(_profile)
+
+
+        _profile.question = qlist[0]
+        _profile.save()
+        print "giving new question"
+    else:
+        print "user already has question"
+
 
     c = {
         'STATIC_URL': settings.STATIC_URL,
         'title': "quiz",
-        'question': q,
+        'question': _profile.question,
 
     }
     return render_to_response('quiz.html', c, context_instance=RequestContext(request))

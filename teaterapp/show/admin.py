@@ -19,9 +19,10 @@ class ProfileAdmin(admin.ModelAdmin):
     search_fields = ('code',)
 admin.site.register(Profile, ProfileAdmin)
 
-class RatingAdmin(admin.ModelAdmin):
-    ordering = ('value', )
-admin.site.register(Rating, RatingAdmin)
+
+#class RatingAdmin(admin.ModelAdmin):
+#    ordering = ('value', )
+#admin.site.register(Rating, RatingAdmin)
 
 
 
@@ -39,6 +40,10 @@ class QuestionAdmin(admin.ModelAdmin):
 admin.site.register(Question, QuestionAdmin)
 
 
+class NoteAdmin(admin.ModelAdmin):
+    ordering = ('id', )
+    search_fields = ('text',)
+admin.site.register(Note, NoteAdmin)
 
 
 #class AnswerAdmin(admin.ModelAdmin):

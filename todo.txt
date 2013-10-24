@@ -1,0 +1,39 @@
+Overall layout in base.html
+ Watermark alt hvad vi ved
+
+Login
+ Focus in code field via js
+
+Admin overview
+ List active profiles
+ List locations
+ Change color of login from admin
+
+
+Overview of location
+ Refresh 
+ Open close location
+ Dismiss participants
+ Adjust scale 
+
+Overview of profile
+ Lock/Unlock
+ Add note
+ Display note
+ 
+Quiz
+ Choose questions
+
+Flow 
+ Choose location
+
+Misc
+ Autologout
+ Codes with checksum (last digit is previous 5 digits added % 10)  
+ Google analytics
+ Print questions for overview (must show nesting)
+
+Tests
+ Sign in 3 players, admin and actor.
+ Test unmanned location
+

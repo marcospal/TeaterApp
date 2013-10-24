@@ -8,9 +8,15 @@
         {% csrf_token %}
         <input type="hidden" name="code" value="{{ code }}" id="name">
         Navn: <input type="text" name="name" id="nameID" onkeyup="update();"><br>
-        Fødselsår: 
+        Født: <br>
+        <select name="day" id="dayID" onchange="update();">
+            <option value="pick">Vælg dag</option>
+        </select><br>
+        <select name="month" id="monthID" onchange="update();">
+            <option value="pick">Vælg måned</option>
+        </select><br>
         <select name="year" id="yearID" onchange="update();">
-            <option value="pick">Vælg årstal</option>
+            <option value="pick">Vælg år</option>
         </select><br>
         
         Køn: <input type="radio" name="sex" value="M" onchange="update();">Mand &nbsp;
@@ -30,15 +36,28 @@
         $("#yearID").append('<option value="'+i+'" onkeyup="update();">'+i+'</option>');
     }
 
+    for(var i = 1; i <= 12;i++)
+    {
+        $("#monthID").append('<option value="'+i+'" onkeyup="update();">'+i+'</option>');
+    }
+
+    for(var i = 1; i <= 31;i++)
+    {
+        $("#dayID").append('<option value="'+i+'" onkeyup="update();">'+i+'</option>');
+    }
+
+
     function update()
     {
         var name = $("#nameID").val();
         var year = $("#yearID").val();
+        var month = $("#monthID").val();
+        var day = $("#dayID").val();
         var sex = $('input[name=sex]:checked', '#myform').val();
         
         
 
-        if(year == "pick" || name.length == 0 || sex == undefined)
+        if(day == "pick" || month == "pick" || year == "pick" || name.length == 0 || sex == undefined)
         {
             $('#submitID').attr('disabled', 'disabled');
         }

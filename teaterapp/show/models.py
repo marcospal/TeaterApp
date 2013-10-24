@@ -3,7 +3,8 @@ from django.contrib.auth.models import User
 
 
 class Scale(models.Model):
-    name = models.CharField(primary_key=True, max_length=256)
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=256, help_text='General name of the scale.')
     def __unicode__(self):
         return "%s" % (self.name)
 
@@ -14,11 +15,29 @@ class Question(models.Model):
     text = models.CharField(max_length=256)
     #some questions are part of a branch, we mark those we can start with
     can_start = models.BooleanField(default=True)
+    
+    #use the priority to sort order of questions
+    priority = models.IntegerField(default=1)
+    
+
     def __unicode__(self):
+        
+        cs = ''
+        if not self.can_start:
+            cs = '(*)'
         a = ''
         for ans in self.possible_answers.all():
             a += ans.text + " "
-        return "%s : ( %s)" % (self.text, a)
+        return "%s %s ( %s)" % (cs, self.text, a)
+
+
+    def getscore(self, profile):
+        score = self.priority
+        #lower score if question has been answered
+        if self in profile.answered_questions.all():
+            score -= 10000
+        return self.priority
+
 
 class Answer(models.Model):
     id = models.AutoField(primary_key=True)
@@ -44,13 +63,15 @@ class Answer(models.Model):
 class Location(models.Model):
     id = models.AutoField(primary_key=True)
     
-    name = models.CharField(max_length=256)
+    name = models.CharField(max_length=256, help_text='Name of location.')
     
+    directions = models.CharField(max_length=256, help_text='How to get there')
+
     #what is the max capacity of this location
-    capacity = models.IntegerField(default=1)
+    capacity = models.IntegerField(default=1, help_text='Maximum number of people that it can hold')
 
     #Is this location only for unlocked profiles
-    safe = models.BooleanField(default=True)
+    safe = models.BooleanField(default=True, help_text='Block locked profiles from entering')
     
     #state of location
     CLOSED, OPEN_FOR_VISITORS, IN_SESSION, NUM_PHASES = range(4)
@@ -63,10 +84,10 @@ class Location(models.Model):
         for a,b in self.PHASES:
             if a == self.phase:
                 return b
-    state = models.IntegerField(choices=PHASES, default=CLOSED)
+    state = models.IntegerField(choices=PHASES, default=CLOSED, help_text='State of location')
 
     #What scale does this location relate to (optional)
-    scale = models.ForeignKey(Scale, related_name='locations', blank=True, null=True)
+    scale = models.ForeignKey(Scale, related_name='locations', blank=True, null=True, help_text='Scale that this location relates to.')
 
     def __unicode__(self):
         return "%s - Kapacitet: %d - Skala: %s - Safe: %s" % (self.name, self.capacity, self.scale, self.safe)
@@ -75,6 +96,12 @@ class Location(models.Model):
 class Profile(models.Model):
     id = models.AutoField(primary_key=True)
     
+    #A Profile can be locked, so he is only sent to safe locations
+    locked = models.BooleanField(default=False)
+    
+    #When show end all Profiles are made inactive
+    active = models.BooleanField(default=True)
+
     #user has code as username
     user = models.ForeignKey(User, related_name='Profiles')
 
@@ -82,13 +109,19 @@ class Profile(models.Model):
     
     #When this number is larger than zero questions must be answered 
     force_questions = models.IntegerField(default=5)
-    
-    #We store the players answers
+
+    #We store the questions the player answers and the answers
+    answered_questions = models.ManyToManyField(Question)
     given_answers = models.ManyToManyField(Answer)
+    
+    #Set if player has a question pending
+    question = models.ForeignKey(Question, related_name='answers', blank=True, null=True)
+    
     
     #Unique code for Profile
     name = models.CharField(max_length=30)
-    year_of_birth = models.IntegerField(default=0)
+    #year_of_birth = models.IntegerField(default=0)
+    birth = models.DateField()
     MALE, FEMALE, UNKNOWN, NUM_GENDERS = range(4)
     GENDERS = (
         (MALE, 'M'),
@@ -103,27 +136,20 @@ class Profile(models.Model):
     
     ratings = models.ManyToManyField(Scale, through='Rating')    
     
-    #A Profile can be locked, so he is only sent to safe locations
-    locked = models.BooleanField(default=False)
     
-    #When show end all Profiles are made inactive
-    active = models.BooleanField(default=True)
 
-    #possible next question
-    question = models.ForeignKey(Question, related_name='answers', blank=True, null=True)
-    
+    #location related
     #A possible location we are assigned to
     location = models.ForeignKey(Location, related_name='profiles', blank=True, null=True)
     
     #What locations has this profile visited
     locations = models.ManyToManyField(Location, related_name='visitors', blank=True, null=True)
 
-
     def __unicode__(self):
         a = ""
         if(self.active):
             a = "active"
-        return "%s - %s - %s%d - code: '%s' - %s" % (self.date.strftime("%d/%m/%Y %H:%M"), self.name, self.genderStr(), self.year_of_birth, self.user.username, a)
+        return "%s - %s - %s %s - code: '%s' - %s" % (self.date.strftime("%d/%m/%Y %H:%M"), self.name, self.genderStr(), self.birth, self.user.username, a)
 
     def addNote(self, text, lock):
         pass
@@ -133,6 +159,7 @@ class Profile(models.Model):
 
 #Rating binds Profiles to scales 
 class Rating(models.Model):
+    id = models.AutoField(primary_key=True)
     date = models.DateTimeField(auto_now_add=True)
     changed = models.DateTimeField(auto_now=True)
     profile = models.ForeignKey(Profile)
@@ -146,10 +173,15 @@ class Rating(models.Model):
 
 #Notes are attached to Profiles
 class Note(models.Model):
+    id = models.AutoField(primary_key=True)
     date = models.DateTimeField(auto_now_add=True)
     changed = models.DateTimeField(auto_now=True)
-    text = models.CharField(primary_key=True, max_length=256)
-    Profile = models.ForeignKey(Profile, related_name='notes')
+    text = models.CharField(max_length=256)
+    profile = models.ForeignKey(Profile, related_name='notes')
+
+    def __unicode__(self):
+        return "%s: %s" % (self.profile.name, self.text)
+
     
 
 
