@@ -20,8 +20,8 @@ class Migration(SchemaMigration):
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('date', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('text', self.gf('django.db.models.fields.CharField')(max_length=256)),
-            ('can_start', self.gf('django.db.models.fields.BooleanField')(default=True)),
             ('priority', self.gf('django.db.models.fields.IntegerField')(default=1)),
+            ('leading_answer', self.gf('django.db.models.fields.related.OneToOneField')(blank=True, related_name='next_question', unique=True, null=True, to=orm['show.Answer'])),
         ))
         db.send_create_signal(u'show', ['Question'])
 
@@ -31,7 +31,6 @@ class Migration(SchemaMigration):
             ('date', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('text', self.gf('django.db.models.fields.CharField')(max_length=256)),
             ('question', self.gf('django.db.models.fields.related.ForeignKey')(related_name='possible_answers', to=orm['show.Question'])),
-            ('next_question', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='pre_answer', null=True, to=orm['show.Question'])),
             ('scale', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='answers', null=True, to=orm['show.Scale'])),
             ('modifier', self.gf('django.db.models.fields.IntegerField')(default=0)),
         ))
@@ -57,9 +56,9 @@ class Migration(SchemaMigration):
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(related_name='Profiles', to=orm['auth.User'])),
             ('date', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('force_questions', self.gf('django.db.models.fields.IntegerField')(default=5)),
-            ('question', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='answers', null=True, to=orm['show.Question'])),
+            ('question', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='pending_profiles', null=True, to=orm['show.Question'])),
             ('name', self.gf('django.db.models.fields.CharField')(max_length=30)),
-            ('year_of_birth', self.gf('django.db.models.fields.IntegerField')(default=0)),
+            ('birth', self.gf('django.db.models.fields.DateField')()),
             ('gender', self.gf('django.db.models.fields.IntegerField')(default=2)),
             ('location', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='profiles', null=True, to=orm['show.Location'])),
         ))
@@ -188,7 +187,6 @@ class Migration(SchemaMigration):
             'date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'modifier': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'next_question': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'pre_answer'", 'null': 'True', 'to': u"orm['show.Question']"}),
             'question': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'possible_answers'", 'to': u"orm['show.Question']"}),
             'scale': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'answers'", 'null': 'True', 'to': u"orm['show.Scale']"}),
             'text': ('django.db.models.fields.CharField', [], {'max_length': '256'})
@@ -214,26 +212,26 @@ class Migration(SchemaMigration):
         u'show.profile': {
             'Meta': {'object_name': 'Profile'},
             'active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'answered_questions': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['show.Question']", 'symmetrical': 'False'}),
+            'answered_questions': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'profiles_that_have_answered'", 'symmetrical': 'False', 'to': u"orm['show.Question']"}),
+            'birth': ('django.db.models.fields.DateField', [], {}),
             'date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'force_questions': ('django.db.models.fields.IntegerField', [], {'default': '5'}),
             'gender': ('django.db.models.fields.IntegerField', [], {'default': '2'}),
-            'given_answers': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['show.Answer']", 'symmetrical': 'False'}),
+            'given_answers': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'profiles_that_have_answered'", 'symmetrical': 'False', 'to': u"orm['show.Answer']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'location': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'profiles'", 'null': 'True', 'to': u"orm['show.Location']"}),
             'locations': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'visitors'", 'null': 'True', 'symmetrical': 'False', 'to': u"orm['show.Location']"}),
             'locked': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '30'}),
-            'question': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'answers'", 'null': 'True', 'to': u"orm['show.Question']"}),
+            'question': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'pending_profiles'", 'null': 'True', 'to': u"orm['show.Question']"}),
             'ratings': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['show.Scale']", 'through': u"orm['show.Rating']", 'symmetrical': 'False'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'Profiles'", 'to': u"orm['auth.User']"}),
-            'year_of_birth': ('django.db.models.fields.IntegerField', [], {'default': '0'})
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'Profiles'", 'to': u"orm['auth.User']"})
         },
         u'show.question': {
             'Meta': {'object_name': 'Question'},
-            'can_start': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'leading_answer': ('django.db.models.fields.related.OneToOneField', [], {'blank': 'True', 'related_name': "'next_question'", 'unique': 'True', 'null': 'True', 'to': u"orm['show.Answer']"}),
             'priority': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
             'text': ('django.db.models.fields.CharField', [], {'max_length': '256'})
         },

@@ -18,7 +18,7 @@ class Question(models.Model):
     priority = models.IntegerField(default=1)
     
     #if a leading answer exist this question cant start
-    leading_answer = models.OneToOneField('Answer', related_name='next_question', blank=True, null=True)
+    leading_answer = models.OneToOneField('Answer', related_name='next_question', unique=True, blank=True, null=True)
     
 
 
@@ -27,15 +27,21 @@ class Question(models.Model):
         a = ''
         for ans in self.possible_answers.all():
             a += ans.text + " "
-        return "%d %s ( %s)" % (self.id, self.text, a)
+        return "%d %d %s ( %s)" % (self.id, self.priority, self.text, a)
 
 
     def getscore(self, profile):
         score = self.priority
         #lower score if question has been answered
-        if profile in self.profiles_that_have_answered.all():
-            score -= 10000
-        return self.priority
+        try:
+            qc = QuestionCount.objects.get(profile=profile, question=self)
+            score -= qc.times * 10000   
+
+        except:
+            pass    
+        
+
+        return score
 
 
 class Answer(models.Model):
@@ -89,7 +95,7 @@ class Location(models.Model):
 
     def __unicode__(self):
         return "%s - Kapacitet: %d - Skala: %s - Safe: %s" % (self.name, self.capacity, self.scale, self.safe)
- 
+
  
 class Profile(models.Model):
     id = models.AutoField(primary_key=True)
@@ -109,7 +115,7 @@ class Profile(models.Model):
     force_questions = models.IntegerField(default=5)
 
     #We store the questions the player answers and the answers
-    answered_questions = models.ManyToManyField(Question, related_name='profiles_that_have_answered')
+    answered_questions = models.ManyToManyField(Question, related_name='profiles_that_have_answered', through='QuestionCount')
     given_answers = models.ManyToManyField(Answer, related_name='profiles_that_have_answered')
     
     #Set if player has a question pending
@@ -141,7 +147,7 @@ class Profile(models.Model):
     location = models.ForeignKey(Location, related_name='profiles', blank=True, null=True)
     
     #What locations has this profile visited
-    locations = models.ManyToManyField(Location, related_name='visitors', blank=True, null=True)
+    locations = models.ManyToManyField(Location, related_name='visitors', through='VisitCount', blank=True, null=True)
 
     def __unicode__(self):
         a = ""
@@ -153,6 +159,19 @@ class Profile(models.Model):
         pass
         #Note.
         #self
+
+
+#Binds Profiles to questions answered. Need counter to rate next question 
+class QuestionCount(models.Model):
+    profile = models.ForeignKey(Profile)
+    question = models.ForeignKey(Question)
+    times = models.IntegerField(default=0)
+
+class VisitCount(models.Model):
+    profile = models.ForeignKey(Profile)
+    location = models.ForeignKey(Location)
+    times = models.IntegerField(default=0)
+
 
 
 #Rating binds Profiles to scales 

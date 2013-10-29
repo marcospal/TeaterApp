@@ -8,15 +8,31 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Deleting field 'Question.can_start'
-        db.delete_column(u'show_question', 'can_start')
+        # Adding model 'VisitCount'
+        db.create_table(u'show_visitcount', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('profile', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['show.Profile'])),
+            ('location', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['show.Location'])),
+            ('times', self.gf('django.db.models.fields.IntegerField')(default=0)),
+        ))
+        db.send_create_signal(u'show', ['VisitCount'])
+
+        # Removing M2M table for field locations on 'Profile'
+        db.delete_table(db.shorten_name(u'show_profile_locations'))
 
 
     def backwards(self, orm):
-        # Adding field 'Question.can_start'
-        db.add_column(u'show_question', 'can_start',
-                      self.gf('django.db.models.fields.BooleanField')(default=True),
-                      keep_default=False)
+        # Deleting model 'VisitCount'
+        db.delete_table(u'show_visitcount')
+
+        # Adding M2M table for field locations on 'Profile'
+        m2m_table_name = db.shorten_name(u'show_profile_locations')
+        db.create_table(m2m_table_name, (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('profile', models.ForeignKey(orm[u'show.profile'], null=False)),
+            ('location', models.ForeignKey(orm[u'show.location'], null=False))
+        ))
+        db.create_unique(m2m_table_name, ['profile_id', 'location_id'])
 
 
     models = {
@@ -86,18 +102,18 @@ class Migration(SchemaMigration):
         u'show.profile': {
             'Meta': {'object_name': 'Profile'},
             'active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'answered_questions': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['show.Question']", 'symmetrical': 'False'}),
+            'answered_questions': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'profiles_that_have_answered'", 'symmetrical': 'False', 'through': u"orm['show.QuestionCount']", 'to': u"orm['show.Question']"}),
             'birth': ('django.db.models.fields.DateField', [], {}),
             'date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'force_questions': ('django.db.models.fields.IntegerField', [], {'default': '5'}),
             'gender': ('django.db.models.fields.IntegerField', [], {'default': '2'}),
-            'given_answers': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['show.Answer']", 'symmetrical': 'False'}),
+            'given_answers': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'profiles_that_have_answered'", 'symmetrical': 'False', 'to': u"orm['show.Answer']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'location': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'profiles'", 'null': 'True', 'to': u"orm['show.Location']"}),
-            'locations': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'visitors'", 'null': 'True', 'symmetrical': 'False', 'to': u"orm['show.Location']"}),
+            'locations': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'visitors'", 'to': u"orm['show.Location']", 'through': u"orm['show.VisitCount']", 'blank': 'True', 'symmetrical': 'False', 'null': 'True'}),
             'locked': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '30'}),
-            'question': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'answers'", 'null': 'True', 'to': u"orm['show.Question']"}),
+            'question': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'pending_profiles'", 'null': 'True', 'to': u"orm['show.Question']"}),
             'ratings': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['show.Scale']", 'through': u"orm['show.Rating']", 'symmetrical': 'False'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'Profiles'", 'to': u"orm['auth.User']"})
         },
@@ -105,9 +121,16 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Question'},
             'date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'leading_answer': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'next_question'", 'null': 'True', 'to': u"orm['show.Answer']"}),
+            'leading_answer': ('django.db.models.fields.related.OneToOneField', [], {'blank': 'True', 'related_name': "'next_question'", 'unique': 'True', 'null': 'True', 'to': u"orm['show.Answer']"}),
             'priority': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
             'text': ('django.db.models.fields.CharField', [], {'max_length': '256'})
+        },
+        u'show.questioncount': {
+            'Meta': {'object_name': 'QuestionCount'},
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'profile': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['show.Profile']"}),
+            'question': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['show.Question']"}),
+            'times': ('django.db.models.fields.IntegerField', [], {'default': '0'})
         },
         u'show.rating': {
             'Meta': {'object_name': 'Rating'},
@@ -122,6 +145,13 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Scale'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '256'})
+        },
+        u'show.visitcount': {
+            'Meta': {'object_name': 'VisitCount'},
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'location': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['show.Location']"}),
+            'profile': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['show.Profile']"}),
+            'times': ('django.db.models.fields.IntegerField', [], {'default': '0'})
         }
     }
 

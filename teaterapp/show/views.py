@@ -12,7 +12,7 @@ import datetime
 import pdb
 
 
-from models import Profile, Question, Rating
+from models import Profile, Question, Rating, QuestionCount
 
 
 #This is the main entrypoint of the application
@@ -135,89 +135,86 @@ def quiz(request):
     if not request.user.is_authenticated():
         return HttpResponseRedirect('/')
     
-    _profile = None
-    try:
-        _profile = Profile.objects.get(user=request.user, active=True)
+    profile = Profile.objects.filter(user=request.user, active=True)
+    if profile.exists():
+        profile = profile.get()
         print "profile found"
-    except:
+    else:
         return HttpResponseRedirect('/')
     
-    #print request.POST
-
-    #pdb.set_trace()
-        
-
-    #recieve answers
-    print "post"
-
     question = request.POST.get("question")
     answer = request.POST.get("answer")
     
     if question != None and answer != None:
-        question = Question.objects.get(id=int(float(question)))
+        question = Question.objects.filter(id=int(float(question)))
+        if question.exists():
+            question = question.get()
+            
+            print "1>", question
+            print "2>", answer
+            print "3>", profile
 
-        print "1>", question
-        print "2>", answer
-        print "3>", _profile
 
-
-        if question == _profile.question:
-
-
-            a = question.possible_answers.filter(text=answer)[:1]
-            if a != None:
-                
-                print "found answer"
-                print a.next_question
+            if question == profile.question:
+                a = question.possible_answers.filter(text=answer)
+                if a.exists():
+                    a = a.get()
+                    print "found answer"
+                    print "--->",a
                     
-                _profile.question = a.next_question
-                _profile.given_answers.add(a)
-                _profile.answered_questions.add(question)
-                
-                if a.scale != None:
-                    r = None
                     try:
-                        r = Rating.objects.get(profile=_profile, scale=a.scale)
+                        profile.question = a.next_question
+                    except Question.DoesNotExist:
+                        profile.question = None
+                    print "next question found: %s" % (profile.question)
+                    
+
+                    print "aaa"
+                    
+                    profile.given_answers.add(a)
+
+                    qc = None
+                    try:
+                        qc = QuestionCount.objects.get(profile=profile, question=question)
                     except:
-                        r = Rating(profile=_profile, scale=a.scale)
-                    r.value += a.modifier
-                    r.save()
-                    print "done"
+                        qc = QuestionCount(profile=profile, question=question)
+                    qc.times += 1
+                    qc.save()
 
-                _profile.force_questions -= 1
-                _profile.save();
+                    print "bbb"
+
+                    if a.scale != None:
+                        r = None
+                        try:
+                            r = Rating.objects.get(profile=profile, scale=a.scale)
+                        except:
+                            r = Rating(profile=profile, scale=a.scale)
+                        r.value += a.modifier
+                        r.save()
+                    profile.force_questions -= 1
+                    profile.save();
+                else:
+                    print "answer not found in current question"
             else:
-                print "answer not found in current question"
-                
-        else:
-            print "answering non pending question"
-
-
+                print "answering non pending question"
     #Find what question to ask
-    q = None
-
-    #is a question assigned 
-    if True: #not _profile.question:
-        #possibly send back to root 
-        prfl = [_profile]
-        qlist = Question.objects.filter(leading_answer__isnull=True)
+    if not profile.question:
+        #find all possible questions
+        questions = Question.objects.filter(leading_answer__isnull=True)
         
-
+        #order them in relation to this profile
         def score(a):
-            return a.getscore(_profile)
+            return a.getscore(profile)
+        questions = list(questions)
+        questions.sort(key=score)
+        questions.reverse()
 
-        print "aaa", qlist
+        #print them
+        for s in questions:
+            print s, s.getscore(profile), s.profiles_that_have_answered.all()
 
-        qlist = list(qlist)
-        qlist.sort(key=score)
-
-        print ">>>bbb", qlist
-        for s in qlist:
-            print s.getscore(_profile), s.profiles_that_have_answered.all()
-
-
-        _profile.question = qlist[0]
-        _profile.save()
+        profile.question = questions[0]
+        profile.save()
         print "giving new question"
     else:
         print "user already has question"
@@ -226,7 +223,7 @@ def quiz(request):
     c = {
         'STATIC_URL': settings.STATIC_URL,
         'title': "quiz",
-        'question': _profile.question,
+        'question': profile.question,
 
     }
     return render_to_response('quiz.html', c, context_instance=RequestContext(request))
