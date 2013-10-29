@@ -13,28 +13,27 @@ class Question(models.Model):
     id = models.AutoField(primary_key=True)
     date = models.DateTimeField(auto_now_add=True)
     text = models.CharField(max_length=256)
-    #some questions are part of a branch, we mark those we can start with
-    can_start = models.BooleanField(default=True)
     
     #use the priority to sort order of questions
     priority = models.IntegerField(default=1)
     
+    #if a leading answer exist this question cant start
+    leading_answer = models.OneToOneField('Answer', related_name='next_question', blank=True, null=True)
+    
+
 
     def __unicode__(self):
         
-        cs = ''
-        if not self.can_start:
-            cs = '(*)'
         a = ''
         for ans in self.possible_answers.all():
             a += ans.text + " "
-        return "%s %s ( %s)" % (cs, self.text, a)
+        return "%d %s ( %s)" % (self.id, self.text, a)
 
 
     def getscore(self, profile):
         score = self.priority
         #lower score if question has been answered
-        if self in profile.answered_questions.all():
+        if profile in self.profiles_that_have_answered.all():
             score -= 10000
         return self.priority
 
@@ -46,7 +45,6 @@ class Answer(models.Model):
     
     question = models.ForeignKey(Question, related_name='possible_answers')
     
-    next_question = models.ForeignKey(Question, related_name='pre_answer', blank=True, null=True)
     #if the answer affect a scale
     scale = models.ForeignKey(Scale, related_name='answers', blank=True, null=True)
     #how much
@@ -111,11 +109,11 @@ class Profile(models.Model):
     force_questions = models.IntegerField(default=5)
 
     #We store the questions the player answers and the answers
-    answered_questions = models.ManyToManyField(Question)
-    given_answers = models.ManyToManyField(Answer)
+    answered_questions = models.ManyToManyField(Question, related_name='profiles_that_have_answered')
+    given_answers = models.ManyToManyField(Answer, related_name='profiles_that_have_answered')
     
     #Set if player has a question pending
-    question = models.ForeignKey(Question, related_name='answers', blank=True, null=True)
+    question = models.ForeignKey(Question, related_name='pending_profiles', blank=True, null=True)
     
     
     #Unique code for Profile

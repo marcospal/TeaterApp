@@ -9,6 +9,7 @@ from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.contrib.admin.views.decorators import staff_member_required
 import re
 import datetime
+import pdb
 
 
 from models import Profile, Question, Rating
@@ -143,62 +144,76 @@ def quiz(request):
     
     #print request.POST
 
-    #recieve answers
-    try:
-        question = int(float(request.POST["question"]))
-        answer = request.POST["answer"]
-        question = Question.objects.get(id=question)
+    #pdb.set_trace()
         
-        if question == _profile.question:
-            for a in question.possible_answers.all():
-                if a.text == answer:
-                    _profile.question = a.next_question
-                    _profile.given_answers.add(a)
-                    _profile.answered_questions.add(question)
-                    if a.scale != None:
-                        r = None
-                        try:
-                            r = Rating.objects.get(profile=_profile, scale=a.scale)
-                        except:
-                            r = Rating(profile=_profile, scale=a.scale)
-                        r.value += a.modifier
-                        r.save()
-                        print "done"
 
-                    _profile.force_questions -= 1
-                    _profile.save();
-                    print "Answered %s" % (a.text)
-                    break
+    #recieve answers
+    print "post"
+
+    question = request.POST.get("question")
+    answer = request.POST.get("answer")
+    
+    if question != None and answer != None:
+        question = Question.objects.get(id=int(float(question)))
+
+        print "1>", question
+        print "2>", answer
+        print "3>", _profile
+
+
+        if question == _profile.question:
+
+
+            a = question.possible_answers.filter(text=answer)[:1]
+            if a != None:
+                
+                print "found answer"
+                print a.next_question
+                    
+                _profile.question = a.next_question
+                _profile.given_answers.add(a)
+                _profile.answered_questions.add(question)
+                
+                if a.scale != None:
+                    r = None
+                    try:
+                        r = Rating.objects.get(profile=_profile, scale=a.scale)
+                    except:
+                        r = Rating(profile=_profile, scale=a.scale)
+                    r.value += a.modifier
+                    r.save()
+                    print "done"
+
+                _profile.force_questions -= 1
+                _profile.save();
+            else:
+                print "answer not found in current question"
+                
         else:
             print "answering non pending question"
-    except:
-        pass
 
 
     #Find what question to ask
     q = None
 
     #is a question assigned 
-    if not _profile.question:
+    if True: #not _profile.question:
         #possibly send back to root 
         prfl = [_profile]
-        qlist = Question.objects.filter(can_start=True)
+        qlist = Question.objects.filter(leading_answer__isnull=True)
         
 
-        print qlist
-        
+        def score(a):
+            return a.getscore(_profile)
+
+        print "aaa", qlist
+
+        qlist = list(qlist)
+        qlist.sort(key=score)
+
+        print ">>>bbb", qlist
         for s in qlist:
-            print s, s.getscore(_profile)
-
-
-        def score(a,b):
-            return a.getscore(_profile) < b.getscore(_profile)
-
-
-        qlist = sorted(qlist, score)
-
-        for s in qlist:
-            print s, s.getscore(_profile)
+            print s.getscore(_profile), s.profiles_that_have_answered.all()
 
 
         _profile.question = qlist[0]
