@@ -1,7 +1,17 @@
 {% extends "base.html" %}
 
 {% block body %}
-    
+    Vælg en
+
+
+    {{ question.text }}
+
+    <form method="post">
+    {% csrf_token %}
+        {% for a in choice %}
+             <INPUT type="submit" name="location" value="{{ a.name }}" name="answer"> 
+        {% endfor %}
+    </form>
 {% endblock %}
 
 

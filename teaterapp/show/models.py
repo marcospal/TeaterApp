@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+from django.db.models import Count
+import datetime
 
 class Scale(models.Model):
     id = models.AutoField(primary_key=True)
@@ -74,6 +75,10 @@ class Location(models.Model):
     #what is the max capacity of this location
     capacity = models.IntegerField(default=1, help_text='Maximum number of people that it can hold')
 
+    #use the priority to sort order of questions
+    priority = models.IntegerField(default=1)
+    
+
     #Is this location only for unlocked profiles
     safe = models.BooleanField(default=True, help_text='Block locked profiles from entering')
     
@@ -95,6 +100,48 @@ class Location(models.Model):
 
     def __unicode__(self):
         return "%s - Kapacitet: %d - Skala: %s - Safe: %s" % (self.name, self.capacity, self.scale, self.safe)
+
+    def getscore(self, profile):
+        score = self.priority
+        #lower score if question has been answered
+        try:
+            qc = VisitCount.objects.get(profile=profile, location=self)
+            score -= qc.times * 10000   
+        except:
+            pass    
+        return score
+
+    @staticmethod
+    def getAvailableLocations(profile):
+        #find all possible locations (OPEN_FOR_VISITORS, and available seats)
+        locations = Location.objects.annotate(visitor_count=Count('visitors')).filter(state=Location.OPEN_FOR_VISITORS)
+        
+
+        #order them in relation to this profile
+        def score(a):
+            return a.getscore(profile)
+        
+        tmp = []
+        for l in list(locations):
+            if l.capacity > l.visitor_count:
+                if l.safe:
+                    print profile.locked
+                    if not profile.locked:
+                        tmp.append(l)
+                else:
+                    tmp.append(l)
+
+        tmp.sort(key=score)
+        tmp.reverse()
+
+        #print them
+        for l in tmp:
+            print l
+            print 'Score', l.getscore(profile)
+            print 'Visitors: ',l.visitors.all()
+            print 'Visitors count: ',l.visitor_count
+
+        return tmp
 
  
 class Profile(models.Model):
@@ -145,7 +192,9 @@ class Profile(models.Model):
     #location related
     #A possible location we are assigned to
     location = models.ForeignKey(Location, related_name='profiles', blank=True, null=True)
-    
+    location_set_time = models.DateTimeField(default=datetime.datetime.now)
+
+
     #What locations has this profile visited
     locations = models.ManyToManyField(Location, related_name='visitors', through='VisitCount', blank=True, null=True)
 

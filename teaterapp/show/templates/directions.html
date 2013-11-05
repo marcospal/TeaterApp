@@ -1,7 +1,23 @@
 {% extends "base.html" %}
 
 {% block body %}
-    
+    Du er henvist til {{ location.name }}<br>
+    {{location.directions}}<br>
+
+    Hvs du har været der og er færdig tryk her.<br>
+
+    {{ age }}
+
+
+    <form method="post">
+
+        {% csrf_token %}
+            
+        <INPUT type="submit" value="done" name="done"> 
+        
+    </form>
+
+
 {% endblock %}
 
 

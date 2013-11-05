@@ -7,12 +7,14 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.contrib.admin.views.decorators import staff_member_required
+from django.db.models import Count
 import re
-import datetime
 import pdb
+import datetime
+from django.utils.timezone import utc
 
 
-from models import Profile, Question, Rating, QuestionCount
+from models import Profile, Question, Rating, QuestionCount, Location, VisitCount
 
 
 #This is the main entrypoint of the application
@@ -57,19 +59,20 @@ def login(request):
         
         #question is waiting
         if profile.question or profile.force_questions > 0:
-            return HttpResponseRedirect('/quiz/');
+            return HttpResponseRedirect('/quiz/')
         
-        #Get list of open locations with room for me
-
-        #Sort list of locations
-
-        #Offer the best 3
-
-        #No relevant location -> more questions
-        return HttpResponseRedirect('/quiz/');
-
-        print profile
-
+        #what locations are possible?
+        locations = Location.getAvailableLocations(profile)
+        if len(locations) == 0:
+            return HttpResponseRedirect('/quiz/');
+        else:
+            #if len(locations) == 1:
+            #    #there is no choice, just send the guy
+            #    profile.location = locations[0]
+            #else:
+            #    #you have a choice
+            return HttpResponseRedirect('/choose/');
+        
     c = {
         'STATIC_URL': settings.STATIC_URL,
         'title': "Login",
@@ -169,8 +172,6 @@ def quiz(request):
                     print "next question found: %s" % (profile.question)
                     
 
-                    print "aaa"
-                    
                     profile.given_answers.add(a)
 
                     qc = None
@@ -181,8 +182,6 @@ def quiz(request):
                     qc.times += 1
                     qc.save()
 
-                    print "bbb"
-
                     if a.scale != None:
                         r = None
                         try:
@@ -192,11 +191,20 @@ def quiz(request):
                         r.value += a.modifier
                         r.save()
                     profile.force_questions -= 1
-                    profile.save();
+                    if profile.force_questions < 0:
+                        profile.force_questions = 0
+                    profile.save()
+
                 else:
                     print "answer not found in current question"
             else:
                 print "answering non pending question"
+    
+    if profile.force_questions <= 0 and len(Location.getAvailableLocations(profile)) > 0:
+        profile.question = None
+        profile.save()
+        return HttpResponseRedirect('/');
+
     #Find what question to ask
     if not profile.question:
         #find all possible questions
@@ -230,19 +238,44 @@ def quiz(request):
 
 
 def choose(request):
+    print "choose"
+
     if not request.user.is_authenticated():
         return HttpResponseRedirect('/')
     
-    profile = None
-    try:
-        profile = Profile.objects.get(username__iexact=request.user.username, active=true)
+    profile = Profile.objects.filter(user=request.user, active=True)
+    if profile.exists():
+        profile = profile.get()
         print "profile found"
-    except:
+    else:
+        return HttpResponseRedirect('/')
+
+    location = request.POST.get("location")
+
+    if location != None:
+        location = Location.objects.filter(name=location)
+        if location.exists():
+            location = location.get()
+            
+            #check its open and that it has the capacity
+            if location in Location.getAvailableLocations(profile):
+                profile.location = location
+                profile.location_set_time = datetime.datetime.utcnow()
+                print "hest"
+
+                profile.save()
+                return HttpResponseRedirect('/')
+        else:
+            print "unknown location"
+
+    locations = Location.getAvailableLocations(profile)
+
+    if not len(locations) > 0:
         return HttpResponseRedirect('/')
     #if request.POST["choice"]:
     c = {
         'STATIC_URL': settings.STATIC_URL,
-        'title': "choose",
+        'choice': locations,
     }
     return render_to_response('choose.html', c, context_instance=RequestContext(request))
 
@@ -250,17 +283,40 @@ def directions(request):
     if not request.user.is_authenticated():
         return HttpResponseRedirect('/')
     
-    profile = None
-    try:
-        profile = Profile.objects.get(username__iexact=request.user.username, active=true)
+    profile = Profile.objects.filter(user=request.user, active=True)
+    if profile.exists():
+        profile = profile.get()
         print "profile found"
-    except:
+    else:
         return HttpResponseRedirect('/')
+
+    if profile.location == None:
+        return HttpResponseRedirect('/')
+
+    print request.POST
+
+    done = request.POST.get("done")
+
+    if done != None:
+        profile.location = None
+        profile.save()
+        return HttpResponseRedirect('/')
+
+    now = datetime.datetime.utcnow().replace(tzinfo=utc)
+    timediff = now - profile.location_set_time
+    age = timediff.total_seconds()
+
+    print a
+    print b
+    print age
+    ##datetime.datetime.utcnow().replace(tzinfo=utc)
+
 
     c = {
         'STATIC_URL': settings.STATIC_URL,
         'title': "Directions",
-        'instructions': "Go to ",
+        'location': profile.location,
+        'age' : age 
            
     }
     return render_to_response('directions.html', c, context_instance=RequestContext(request))
