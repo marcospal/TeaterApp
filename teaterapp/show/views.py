@@ -14,6 +14,7 @@ import datetime
 from django.utils.timezone import utc
 
 
+
 from models import Profile, Question, Rating, QuestionCount, Location, VisitCount
 
 
@@ -260,7 +261,7 @@ def choose(request):
             #check its open and that it has the capacity
             if location in Location.getAvailableLocations(profile):
                 profile.location = location
-                profile.location_set_time = datetime.datetime.utcnow()
+                profile.location_set_time = datetime.datetime.now()
                 print "hest"
 
                 profile.save()
@@ -302,21 +303,17 @@ def directions(request):
         profile.save()
         return HttpResponseRedirect('/')
 
-    now = datetime.datetime.utcnow().replace(tzinfo=utc)
-    timediff = now - profile.location_set_time
-    age = timediff.total_seconds()
+    now1 = datetime.datetime.utcnow().replace()
+    now2 = datetime.datetime.utcnow().replace()
 
-    print a
-    print b
-    print age
-    ##datetime.datetime.utcnow().replace(tzinfo=utc)
-
+    age = (datetime.datetime.now() - profile.location_set_time).seconds
+    
 
     c = {
         'STATIC_URL': settings.STATIC_URL,
         'title': "Directions",
         'location': profile.location,
-        'age' : age 
+        'age': age
            
     }
     return render_to_response('directions.html', c, context_instance=RequestContext(request))
