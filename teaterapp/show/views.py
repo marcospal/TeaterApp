@@ -262,8 +262,6 @@ def choose(request):
             if location in Location.getAvailableLocations(profile):
                 profile.location = location
                 profile.location_set_time = datetime.datetime.now()
-                print "hest"
-
                 profile.save()
                 return HttpResponseRedirect('/')
         else:
@@ -277,6 +275,7 @@ def choose(request):
     c = {
         'STATIC_URL': settings.STATIC_URL,
         'choice': locations,
+
     }
     return render_to_response('choose.html', c, context_instance=RequestContext(request))
 
@@ -299,7 +298,17 @@ def directions(request):
     done = request.POST.get("done")
 
     if done != None:
+        
+        qc = None
+        try:
+            qc = VisitCount.objects.get(profile=profile, location=profile.location)
+        except:
+            qc = VisitCount(profile=profile, location=profile.location)
+        qc.times += 1
+        qc.save()
+
         profile.location = None
+
         profile.save()
         return HttpResponseRedirect('/')
 
@@ -313,7 +322,8 @@ def directions(request):
         'STATIC_URL': settings.STATIC_URL,
         'title': "Directions",
         'location': profile.location,
-        'age': age
+        'age': age,
+        'score': profile.location.getscore(profile)
            
     }
     return render_to_response('directions.html', c, context_instance=RequestContext(request))

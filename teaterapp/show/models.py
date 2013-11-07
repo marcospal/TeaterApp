@@ -98,17 +98,50 @@ class Location(models.Model):
     #What scale does this location relate to (optional)
     scale = models.ForeignKey(Scale, related_name='locations', blank=True, null=True, help_text='Scale that this location relates to.')
 
+
+    parameters = models.ManyToManyField(Scale, through='Parameter')    
+    
+
+
     def __unicode__(self):
         return "%s - Kapacitet: %d - Skala: %s - Safe: %s" % (self.name, self.capacity, self.scale, self.safe)
 
     def getscore(self, profile):
-        score = self.priority
-        #lower score if question has been answered
+        score = 0
+        #print self.name
+        #go through each parameter of room
+        n = 0
+        for p in self.parameter_set.all():
+            r = 5
+            try:
+                r = profile.rating_set.get(scale=p.scale).value
+                #print "profile has rating on this scale", r
+            except:
+                pass
+                #print "profile has no rating on this scale"
+            
+            #print "room has ", p.value, " profile has ", r, " difference = ", p.value - r
+            
+            score += p.value - r
+            n += 1
+        if n > 0:
+            score /= n
+
+        #print "profile vs room score is ", score
+
+        #Add rooms own priority (handicap if you like)
+        #print "we are adding a priority bonus of", self.priority
+        score += self.priority
+        
+        #lower score if location has been visited before
         try:
             qc = VisitCount.objects.get(profile=profile, location=self)
+            #print "and subtracting ", qc.times, " * 10000"
             score -= qc.times * 10000   
         except:
             pass    
+        
+
         return score
 
     @staticmethod
@@ -204,11 +237,6 @@ class Profile(models.Model):
             a = "active"
         return "%s - %s - %s %s - code: '%s' - %s" % (self.date.strftime("%d/%m/%Y %H:%M"), self.name, self.genderStr(), self.birth, self.user.username, a)
 
-    def addNote(self, text, lock):
-        pass
-        #Note.
-        #self
-
 
 #Binds Profiles to questions answered. Need counter to rate next question 
 class QuestionCount(models.Model):
@@ -221,8 +249,6 @@ class VisitCount(models.Model):
     location = models.ForeignKey(Location)
     times = models.IntegerField(default=0)
 
-
-
 #Rating binds Profiles to scales 
 class Rating(models.Model):
     id = models.AutoField(primary_key=True)
@@ -233,9 +259,19 @@ class Rating(models.Model):
     value = models.IntegerField(default=5)
 
     def __unicode__(self):
-        return "%s %s %d - %s: %d" % (self.profile.user.username, self.profile.name, self.profile.year_of_birth , self.scale.name, self.value)
+        return "%s %s - %s: %d" % (self.profile.user.username, self.profile.name, self.scale.name, self.value)
 
+#Rating binds Locations to scales 
+class Parameter(models.Model):
+    id = models.AutoField(primary_key=True)
+    date = models.DateTimeField(auto_now_add=True)
+    changed = models.DateTimeField(auto_now=True)
+    location = models.ForeignKey(Location)
+    scale = models.ForeignKey(Scale)
+    value = models.IntegerField(default=5)
 
+    def __unicode__(self):
+        return "%s" % (self.location.name)
 
 #Notes are attached to Profiles
 class Note(models.Model):
@@ -247,9 +283,4 @@ class Note(models.Model):
 
     def __unicode__(self):
         return "%s: %s" % (self.profile.name, self.text)
-
-    
-
-
-
 

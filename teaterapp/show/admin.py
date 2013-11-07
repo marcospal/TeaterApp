@@ -8,15 +8,24 @@ class ScaleAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 admin.site.register(Scale, ScaleAdmin)
 
+
+class LocationScaleInLine(admin.TabularInline):
+    model = Location.parameters.through
+
+
 class LocationAdmin(admin.ModelAdmin):
     ordering = ('name',)
     search_fields = ('name',)
+    inlines = [ LocationScaleInLine, ]
 admin.site.register(Location, LocationAdmin)
 
+class ProfileScaleInLine(admin.TabularInline):
+    model = Profile.ratings.through
 
 class ProfileAdmin(admin.ModelAdmin):
     ordering = ('active', )
     search_fields = ('code',)
+    inlines = [ ProfileScaleInLine, ]
 admin.site.register(Profile, ProfileAdmin)
 
 
