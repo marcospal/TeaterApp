@@ -332,9 +332,13 @@ def directions(request):
 
 @staff_member_required
 def overview(request):
+    
+    locations = Location.objects.all()
+
     c = {
         'STATIC_URL': settings.STATIC_URL,
         'title': "overview",
+        'locations': locations
     }
     return render_to_response('overview.html', c, context_instance=RequestContext(request))
 

@@ -2,6 +2,75 @@
 
 {% block body %}
     
+    <h1>Loactions</h1>
+    <table border="1">
+    <tr>
+        <td>
+            Navn
+        </td>
+        <td>
+            Kapacitet
+        </td>
+        <td>
+            Tilstand
+        </td>
+        <td>
+            Profiler
+        </td>
+    </tr>
+   {%for l in locations %}
+        <tr>
+            <td>
+                {{l.name}}
+            </td>
+            <td>
+                {{l.profiles.count}}/{{l.capacity}}
+            </td>
+            <td>
+                {{l.state}}
+            </td>
+            <td>
+                {% for p in l.profiles.all %}
+                    {{ p.name }}, {{ p.birth }}, 
+                {% endfor %}
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+    
+    <h1>Frie profiler</h1>
+    <table border="1">
+    <tr>
+        <td>
+            Name
+        </td>
+        <td>
+            Profiles/capacity
+        </td>
+        <td>
+            State
+        </td>
+        
+        
+    </tr>
+   
+    {%for l in locations %}
+        <tr>
+            <td>
+                {{l.name}}
+            </td>
+            <td>
+                {{l.profiles.count}}/{{l.capacity}}
+            </td>
+            <td>
+                {{l.state}}
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+
+
+
 {% endblock %}
 
 
