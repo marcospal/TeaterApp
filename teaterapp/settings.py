@@ -173,5 +173,5 @@ LOGGING = {
 
 try:
    from production_settings import *
-except ImportError, e:
+except ImportError:
    pass
