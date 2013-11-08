@@ -1,28 +1,70 @@
 {% extends "base.html" %}
 
 {% block body %}
-    <h1>Indtast basisinformation</h1>
+    <h2>Om dig:</h2>
         
-    Kode: <strong>{{ code }}</strong><br>
-    <form method="post" id="myform">
+    <form method="post" id="form" class="form-horizontal" role="form">
         {% csrf_token %}
+
+        <div class="form-group">
+           <label for="code" class="col-sm-2 control-label">Kode:</label>
+           <div class="col-sm-5">
+            <label for="code" class="control-label">{{code}}</label>
+            
+            </div>
+
+        </div>
+
+
         <input type="hidden" name="code" value="{{ code }}" id="name">
-        Navn: <input type="text" name="name" id="nameID" onkeyup="update();"><br>
-        Født: <br>
-        <select name="day" id="dayID" onchange="update();">
-            <option value="pick">Vælg dag</option>
-        </select><br>
-        <select name="month" id="monthID" onchange="update();">
-            <option value="pick">Vælg måned</option>
-        </select><br>
-        <select name="year" id="yearID" onchange="update();">
-            <option value="pick">Vælg år</option>
-        </select><br>
+        <div class="form-group">
+             <label for="name" class="col-sm-2 control-label">Navn:</label>
+             <div class="col-sm-5">
+                <input type="text" name="name" id="nameID" class="form-control" onkeyup="update();">
+            </div>
+        </div>
+
+        <div class="form-group">
+             <label for="birthday" class="col-sm-2 control-label">Fødselsdag:</label>
+             <div class="col-sm-2">
+                
+                <select  name="day" id="dayID" class="form-control" onchange="update();">
+                    <option value="pick">Dag</option>
+                </select>
+            </div>
+
+            <div class="col-sm-2">
+                <select name="month" id="monthID" class="form-control" onchange="update();">
+                    <option value="pick">Måned</option>
+                </select>
+            </div>
+
+            <div class="col-sm-2">
+                <select name="year" id="yearID" class="form-control" onchange="update();">
+                    <option value="pick">År</option>
+                </select>
+
+            </div>
+        </div>
+
+       
+
+        <div class="form-group">
         
-        Køn: <input type="radio" name="sex" value="M" onchange="update();">Mand &nbsp;
-             <input type="radio" name="sex" value="F" onchange="update();">Kvinde</br>
-        
-        <INPUT type="submit" value="Bekræft" id="submitID" disabled> 
+           <label for="sex" class="col-sm-2 control-label">Køn:</label>
+           <div class="col-sm-5">
+             <label class="radio-inline">
+                <input type="radio" name="sex" value="M" onchange="update();"> Mand
+            </label>
+            <label class="radio-inline">
+                <input type="radio" name="sex" value="F"  onchange="update();"> Kvinde
+            </label>
+
+            </div>
+
+        </div>
+
+        <INPUT type="submit" value="Bekræft" id="submitID"  class="btn btn-primary" disabled> 
     </form>
 
 {% endblock %}

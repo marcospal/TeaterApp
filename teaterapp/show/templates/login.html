@@ -3,11 +3,10 @@
 {% block body %}
     <form method="post">
         {% csrf_token %}
-        Kode: <input type="text" name="code" id="codeID" maxlength="6"><br>
+        Dit login: <input type="text" name="code" id="codeID" maxlength="6"><br>
     </form>
-
-<h1>{{ test }}</h1>
-
+    <br/>
+<p class="text-muted">Dit login er de 4 første tal/bogstaver på din billet. </p>
 
 {% endblock %}
 
