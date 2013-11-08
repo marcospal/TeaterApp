@@ -1,0 +1,17 @@
+Django==1.5.1
+PIL==1.1.7
+South==0.8.2
+distribute==0.6.45
+django-allauth==0.8.1
+django-bootstrap-toolkit==2.5.9
+django-crispy-forms==1.1.4
+django-oembed==0.1.0
+django-ratings==0.3.7
+django-taggit==0.9.3
+httplib2==0.8
+lightblue==0.4
+nxt-python==2.2.2
+oauth2==1.5.211
+python-openid==2.2.5
+pyusb==1.0.0b1
+wsgiref==0.1.2
