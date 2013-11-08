@@ -9,14 +9,20 @@
 
     {% csrf_token %}
     <input type="hidden" name="question" value="{{ question.id }}">
-        
+    
+    
+    <div class="center-block">
+    <center>
     {% for a in question.possible_answers.all %}
-    <div class="row">
-         <INPUT class= "btn btn-primary btn-lg btn-block" type="submit" value="{{ a.text }}" name="answer"> 
-         <br/>
+   
+         <INPUT class= "btn btn-primary btn-lg " style="margin-left:20px;" type="submit" value="{{ a.text }}" name="answer"/> 
+        
          
-    </div>
+  
     {% endfor %}
+    </center>
+    </div>
+    
 </form>
     
 {% endblock %}

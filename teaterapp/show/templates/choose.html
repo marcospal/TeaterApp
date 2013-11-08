@@ -11,11 +11,22 @@
 
     <form method="post">
     {% csrf_token %}
+    
+    <center>
         {% for a in choice %}
-             <INPUT class= "btn btn-primary btn-lg btn-block" type="submit" value="{{ a.name }}" name="location"> 
+        <div class="row col-md-10 col-md-offset-1">
+             <INPUT class= "btn btn-primary btn-lg btn-block " style="margin-top:20px; " type="submit" value="{{ a.name }}" name="location"/> 
+           </div>
+
         {% endfor %}
+
+         
+    </center>
+
     </form>
+<div class="clearfix"></div>
 {% endblock %}
+
 
 
 {% block javascript %}
