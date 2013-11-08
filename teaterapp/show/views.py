@@ -373,7 +373,7 @@ def location(request, id):
         try:
             r = Rating.objects.get(profile=p, scale=l.scale)
         except Rating.DoesNotExist:
-            r = Rating(profile=p, location=l)
+            r = Rating(profile=p, location=l.scale)
 
         if a == '+':
             r.value = min(9, r.value + 1)
@@ -399,12 +399,35 @@ def profile(request, id):
     except:
         return HttpResponseRedirect('/')
 
+    print request.POST
+    #Allow location owner to adjust profile    
+    s = request.POST.get('scale');
+    p = request.POST.get('profile');
+    a = request.POST.get('action');
+    if(s != None and p != None and a != None):
+        p = Profile.objects.get(id=int(float(p)))
+        s = Scale.objects.get(id=int(float(s)))
+        r = None
+        try:
+            r = Rating.objects.get(profile=p, scale=s)
+        except Rating.DoesNotExist:
+            r = Rating(profile=p, location=s)
+
+        if a == '+':
+            r.value = min(9, r.value + 1)
+            r.save()
+            print "add"
+        if a == '-':
+            r.value = max(1, r.value - 1)
+            r.save()
+            print "sub"
 
 
     c = {
         'STATIC_URL': settings.STATIC_URL,
-        'title': "profile",
-        'profile': profile
+        'title' : "profile",
+        'profile' : profile,
+        'next' : Location.getAvailableLocations(profile)   
     }
     return render_to_response('profile.html', c, context_instance=RequestContext(request))
     

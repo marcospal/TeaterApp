@@ -45,13 +45,22 @@
 
     Karakterblad:
     <table border="1">
-        {% for s in profile.rating_set.all %}
+        {% for r in profile.rating_set.all %}
         <tr>
             <td>
-                {{ s.scale.name }}
+                {{ r.scale.name }}
             </td>
             <td>
-                {{ s.value }}
+                <form method="post" id="form" class="form-horizontal" role="form">
+                    {% csrf_token %}
+                    <input type="hidden" name="profile" value="{{ profile.id }}">
+                    <input type="hidden" name="scale" value="{{ r.scale.id }}">
+                    <INPUT type="submit" value="-" name="action"  class="btn btn-primary"> 
+                    {{ r.value }}    
+                    <INPUT type="submit" value="+" name="action"  class="btn btn-primary"> 
+                </form>
+
+                
             </td>
         </tr>
         {% endfor %}
@@ -59,6 +68,14 @@
 
     Noter:
     <table border="1">
+        <tr>
+            <td>
+                Dato
+            </td>
+            <td>
+                Tekst
+            </td>
+        </tr>
         {% for n in profile.notes.all %}
         <tr>
             <td>
@@ -70,6 +87,43 @@
         </tr>
         {% endfor %}
     </table>
+
+    Nuværende rum:<br>
+    {% if profile.location %}
+        {{ profile.location.name }}
+    {% else %}
+        Ingen
+    {% endif %}
+    <br>
+
+
+    Næste mulige rum:
+    <table border="1">
+        <tr>
+            <td>
+                Lokation
+            </td>
+            <td>
+                Score
+            </td>
+        </tr>
+
+        {% for l in next %}
+        <tr>
+            <td>
+                {{ l.name }}
+            </td>
+            <td>
+                {{ l|getscore:profile }}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    
+
+
+
+
 
     <a href="/">Tilbage</a>
 

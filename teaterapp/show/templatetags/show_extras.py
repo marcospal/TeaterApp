@@ -17,12 +17,18 @@ def relative(value):
     
 @register.filter(name='scaleval')
 def scaleval(value, arg):
-    return value.rating_set.get(scale=arg.scale).value
+    return value.rating_set.get(scale=arg).value
 
 
 
 @register.filter(name='statestr')
-def sstatestr(value):
+def statestr(value):
     return value.stateStr()
+
+
+@register.filter(name='getscore')
+def statestr(value, arg):
+    return value.getscore(arg)
+
 
 

@@ -62,7 +62,7 @@
                                 <input type="hidden" name="location" value="{{ location.id }}">
 
                                 <INPUT type="submit" value="-" name="action"  class="btn btn-primary"> 
-                                {{ p|scaleval:location }}
+                                {{ p|scaleval:location.scale }}
                                 <INPUT type="submit" value="+" name="action"  class="btn btn-primary"> 
                             </form>
                         </td>
