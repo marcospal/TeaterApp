@@ -1,3 +1,4 @@
+from settings import *
 # Django local settings for teaterapp project.
 
 LIVE = True
