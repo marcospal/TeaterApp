@@ -77,10 +77,10 @@
     {
         $("#yearID").append('<option value="'+i+'" onkeyup="update();">'+i+'</option>');
     }
-
-    for(var i = 1; i <= 12;i++)
+    var months= ['Januar','Februar','Marts','April','Maj','Juni','Juli','September','Oktover','November','December']
+    for(var i = 1; i < months.length;i++)
     {
-        $("#monthID").append('<option value="'+i+'" onkeyup="update();">'+i+'</option>');
+        $("#monthID").append('<option value="'+i+'" onkeyup="update();">'+months[i]+'</option>');
     }
 
     for(var i = 1; i <= 31;i++)
