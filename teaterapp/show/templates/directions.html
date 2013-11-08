@@ -1,22 +1,20 @@
 {% extends "base.html" %}
 
 {% block body %}
-    Du er henvist til {{ location.name }}<br>
-    {{location.directions}}<br>
+<p>
+    Du er henvist til <strong>{{ location.name }}</strong></p>
+    <p>{{location.directions}}</p>
 
 
-    <br>
-    Score: {{ score }}<br>
-    {{ location.priority }}
-    <br>
-
+   
+<br/>
 
     
     {% if age > 5%}
+    <p>
+    Hvs du har besøgt lokationen og er færdig tryk videre.<br>
+    </p>
     
-    Hvs du har besøgt lokationen og er færdig tryk her.<br>
-
-    {{ age }}
 
     
 
@@ -24,14 +22,18 @@
 
         {% csrf_token %}
             
-        <INPUT type="submit" value="Næste" name="done"> 
+        <INPUT type="submit" value="Videre" name="done" class= "btn btn-primary btn-lg btn-block"> 
         
 
 
     </form>
     {% endif %}
 
-
+<br/>
+<p><strong>Udvikler info:</strong>
+    Score: {{ score }}, priority: 
+    {{ location.priority }}, age: {{ age }}
+    </p>
 {% endblock %}
 
 

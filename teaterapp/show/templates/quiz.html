@@ -1,16 +1,21 @@
 {% extends "base.html" %}
 
 {% block body %}
-
+<p>
 {{ question.text }}
-
+</p>
+<br/>
 <form method="post">
 
     {% csrf_token %}
     <input type="hidden" name="question" value="{{ question.id }}">
         
     {% for a in question.possible_answers.all %}
-         <INPUT type="submit" value="{{ a.text }}" name="answer"> 
+    <div class="row">
+         <INPUT class= "btn btn-primary btn-lg btn-block" type="submit" value="{{ a.text }}" name="answer"> 
+         <br/>
+         
+    </div>
     {% endfor %}
 </form>
     
