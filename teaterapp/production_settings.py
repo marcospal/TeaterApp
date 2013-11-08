@@ -24,7 +24,7 @@ STATIC_ROOT = '/home/tax/webapps/contabile2_static/' #/Users/jesper/TeaterApp/te
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
-STATIC_URL = '/static/'
+STATIC_URL = 'http://static.contabile2.kanako.dk/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
