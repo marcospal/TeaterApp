@@ -1,7 +1,80 @@
 {% extends "base.html" %}
-
+{% load show_extras %}
 {% block body %}
     
+    {{ location.name }}<br>
+
+    {{ location.profiles.count }} /  {{ location.capacity }}<br>
+
+    {{ location|statestr }}
+
+
+     <table border="1">
+            <tr>
+                <td>
+                    Navn
+                </td>
+                <td>
+                    Køn
+                </td>
+                <td>
+                    Alder
+                </td>
+                <td>
+                    Kode
+                </td>
+                <td>
+                    Noter/Låst
+                </td>
+                {% if location.scale %} 
+                    <td>
+                        Karater: {{ location.scale }}
+                    </td>
+                {% endif%}
+
+            </tr>
+            {% for p in location.profiles.all %}
+                {% if p.active %}
+                    <tr>
+                        <td>                    
+                            <a href="/profile/{{p.id}}/">{{p.name}}</a>
+                        <td>
+                            {{ p|gender }}
+                        </td>
+                        <td>
+                            {{p.birth|timesince}}
+                        </td>
+                        <td>
+                            {{ p.user.username }}
+                        </td>
+                        <td>
+                            {% if p.locked %}
+                                Låst
+                            {% else %}
+
+                            {% endif %}
+                        </td>
+                        {% if location.scale %} 
+                        <td>
+                            <form method="post" id="form" class="form-horizontal" role="form">
+                                {% csrf_token %}
+                                <input type="hidden" name="profile" value="{{ p.id }}">
+                                <input type="hidden" name="location" value="{{ location.id }}">
+
+                                <INPUT type="submit" value="-" name="action"  class="btn btn-primary"> 
+                                {{ p|scaleval:location }}
+                                <INPUT type="submit" value="+" name="action"  class="btn btn-primary"> 
+                            </form>
+                        </td>
+                    {% endif%}
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </table>
+
+
+<a href="/">Tilbage</a>
+
 {% endblock %}
 
 

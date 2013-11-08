@@ -91,7 +91,7 @@ class Location(models.Model):
     )
     def stateStr(self):
         for a,b in self.PHASES:
-            if a == self.phase:
+            if a == self.state:
                 return b
     state = models.IntegerField(choices=PHASES, default=CLOSED, help_text='State of location')
 
@@ -105,6 +105,9 @@ class Location(models.Model):
 
     def __unicode__(self):
         return "%s - Kapacitet: %d - Skala: %s - Safe: %s" % (self.name, self.capacity, self.scale, self.safe)
+
+    def aciveProfiles(self):
+        return Profile.objects.filter(location=self, active=True)
 
     def getscore(self, profile):
         score = 0
@@ -196,7 +199,7 @@ class Profile(models.Model):
 
     #We store the questions the player answers and the answers
     answered_questions = models.ManyToManyField(Question, related_name='profiles_that_have_answered', through='QuestionCount')
-    given_answers = models.ManyToManyField(Answer, related_name='profiles_that_have_answered')
+    given_answers = models.ManyToManyField(Answer, related_name='profiles_that_have_answered', blank=True)
     
     #Set if player has a question pending
     question = models.ForeignKey(Question, related_name='pending_profiles', blank=True, null=True)
@@ -209,13 +212,14 @@ class Profile(models.Model):
     MALE, FEMALE, UNKNOWN, NUM_GENDERS = range(4)
     GENDERS = (
         (MALE, 'M'),
-        (FEMALE, 'F'),
+        (FEMALE, 'K'),
         (UNKNOWN, '?'),
     )
     def genderStr(self):
         for a,b in self.GENDERS:
             if a == self.gender:
                 return b
+
     gender = models.IntegerField(choices=GENDERS, default=UNKNOWN)
     
     ratings = models.ManyToManyField(Scale, through='Rating')    
@@ -284,7 +288,7 @@ class Note(models.Model):
     id = models.AutoField(primary_key=True)
     date = models.DateTimeField(auto_now_add=True)
     changed = models.DateTimeField(auto_now=True)
-    text = models.CharField(max_length=256)
+    text = models.TextField(max_length=256)
     profile = models.ForeignKey(Profile, related_name='notes')
 
     def __unicode__(self):

@@ -22,10 +22,16 @@ admin.site.register(Location, LocationAdmin)
 class ProfileScaleInLine(admin.TabularInline):
     model = Profile.ratings.through
 
+class ProfileNoteInLine(admin.TabularInline):
+    model = Note
+    #fk_name = 'question' #or 'world', as applicable.
+    extra=1
+
+
 class ProfileAdmin(admin.ModelAdmin):
     ordering = ('active', )
     search_fields = ('code',)
-    inlines = [ ProfileScaleInLine, ]
+    inlines = [ ProfileScaleInLine, ProfileNoteInLine ]
 admin.site.register(Profile, ProfileAdmin)
 
 

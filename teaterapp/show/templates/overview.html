@@ -1,15 +1,7 @@
 {% extends "base.html" %}
-
+{% load show_extras %}
 {% block body %}
-    name
-    directions
-    capacity
-    safe
-    state
-    scale
-    parameters
-
-    <h1>Frie profiler</h1>
+    Frie profiler
     <table border="1">
         <tr>
             <td>
@@ -22,55 +14,96 @@
                 Alder
             </td>
             <td>
+                Kode
+            </td>
+            <td>
                 Noter/Låst
             </td>
+            <td>
+                Send til lokation
+            </td>
+            
         </tr>
         {% for f in free_profiles%}
             <tr>
                 <td>                    
-                    {{f.name}}
+                     <a href="/profile/{{f.id}}/">{{f.name}}</a>
                 <td>
-                    {{ f.gender|gender }}
+                    {{ f|gender }}
                 </td>
                 <td>
-                    {{f.birth|date:"Y"}}
+                    {{f.birth|timesince}}
                 </td>
                 <td>
-                    
+                    {{ f.user.username }}
                 </td>
+                <td>
+                    {% if f.locked %}
+                        Låst
+                    {% else %}
+
+                    {% endif %}
+                </td>
+                <td>
+                    dropdown
+                </td>
+                
             </tr>
         {% endfor %}
-
     </table>
 
+    {% for l in locations%}
+    <a href="/location/{{l.id}}/">{{ l.name }}</a>
 
-    <h1>Loactions</h1>
+
+
+        <table border="1">
+            <tr>
+                <td>
+                    Navn
+                </td>
+                <td>
+                    Køn
+                </td>
+                <td>
+                    Alder
+                </td>
+                <td>
+                    Kode
+                </td>
+                <td>
+                    Noter/Låst
+                </td>
+            </tr>
+            {% for p in l.aciveProfiles.all %}
+                <tr>
+                    <td>                    
+                        <a href="/profile/{{p.id}}/">{{p.name}}</a>
+                    <td>
+                        {{ p|gender }}
+                    </td>
+                    <td>
+                        {{p.birth|timesince}}
+                    </td>
+                    <td>
+                        {{ p.user.username }}
+                    </td>
+                    <td>
+                        {% if p.locked %}
+                            Låst
+                        {% else %}
+
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+
+
+    {% endfor %}
+
+
     
-
-    <table border="1">
-        <tr>
-            <td>
-                Navn
-            </td>
-            <td>
-                Kapacitet
-            </td>
-            <td>
-                Tilstand
-            </td>
-            <td>
-                Profiler
-            </td>
-        </tr>
-        {%for l in locations %}
-            
-        {% endfor %}
-    </table>
-    
-    <h1>Frie profiler</h1>
-    
-
-
 {% endblock %}
 
 

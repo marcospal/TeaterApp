@@ -101,24 +101,33 @@ def baseinfo(request):
     except:
         pass
 
-    try:
         print request.POST
 
-        _code = request.POST['code'];
-        _name = request.POST['name'];
-        _sex = request.POST['sex'];
-        _day = int(float(request.POST['day'])) ;
-        _month = int(float(request.POST['month'])) ;
-        _year = int(float(request.POST['year'])) ;
+    _code = request.POST.get('code');
+    _name = request.POST.get('name');
+    _sex = request.POST.get('sex');
+    _day = request.POST.get('day') ;
+    _month = request.POST.get('month') ;
+    _year = request.POST.get('year') ;
 
-        print datetime.date(_year,_month,_day) 
-
+    if _code != None and _name != None and _sex != None and _day != None and _month != None and _year != None:
+        print _code, _name, _sex, _day, _month, _year
 
         for a,b in Profile.GENDERS:
             if b == _sex:
                 _sex = a
         
-        profile = Profile(user=request.user, name=_name, birth=datetime.date(_year,_month,_day) , gender=_sex)
+        print _sex
+
+        _year = int(float(_year))
+        _month = int(float(_month))
+        _day = int(float(_day))
+
+        print _year, _month, _day
+
+        d = datetime.date(_year,_month, _day)
+        print d
+        profile = Profile(user=request.user, name=_name, birth=d, gender=_sex)
         profile.save()
 
         print "creating default ratings"
@@ -128,8 +137,6 @@ def baseinfo(request):
             r.save()
 
         return HttpResponseRedirect('/')
-    except:
-        pass
 
 
     c = {
@@ -349,22 +356,55 @@ def overview(request):
 
 @staff_member_required
 def location(request, id):
+    profile = None
+    try:
+        location = Location.objects.get(id=id)
+    except:
+        return HttpResponseRedirect('/')
+
+    #Allow location owner to adjust profile    
+    l = request.POST.get('location');
+    p = request.POST.get('profile');
+    a = request.POST.get('action');
+    if(l != None and p != None and a != None):
+        p = Profile.objects.get(id=int(p))
+        l = Location.objects.get(id=int(l))
+        r = None
+        try:
+            r = Rating.objects.get(profile=p, scale=l.scale)
+        except Rating.DoesNotExist:
+            r = Rating(profile=p, location=l)
+
+        if a == '+':
+            r.value = min(9, r.value + 1)
+            r.save()
+            print "add"
+        if a == '-':
+            r.value = max(1, r.value - 1)
+            r.save()
+            print "sub"
+
     c = {
         'STATIC_URL': settings.STATIC_URL,
         'title': "location",
+        'location': location
     }
     return render_to_response('location.html', c, context_instance=RequestContext(request))
 
 @staff_member_required
 def profile(request, id):
-    #if not request.user.is_authenticated():
-    #    return HttpResponseRedirect('/')
-    #if not request.user.is_superuser:
-    #    return HttpResponseRedirect('/')
+    profile = None
+    try:
+        profile = Profile.objects.get(active=True, id=id)
+    except:
+        return HttpResponseRedirect('/')
+
+
 
     c = {
         'STATIC_URL': settings.STATIC_URL,
         'title': "profile",
+        'profile': profile
     }
     return render_to_response('profile.html', c, context_instance=RequestContext(request))
     

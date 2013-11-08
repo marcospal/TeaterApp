@@ -1,7 +1,78 @@
 {% extends "base.html" %}
+{% load show_extras %}
 
 {% block body %}
     
+    Profil
+    <table border="1">
+        <tr>
+            <td>
+                Navn:
+            </td>
+            <td>
+                {{ profile.name }}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Alder:
+            </td>
+            <td>
+                {{ profile.birth|timesince }}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Køn:
+            </td>
+            <td>
+                {{ profile|gender }}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Låst:
+            </td>
+            <td>
+                {% if profile.locked %}
+                    Locked
+                {% else %}
+                    Not locked
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+
+    Karakterblad:
+    <table border="1">
+        {% for s in profile.rating_set.all %}
+        <tr>
+            <td>
+                {{ s.scale.name }}
+            </td>
+            <td>
+                {{ s.value }}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    Noter:
+    <table border="1">
+        {% for n in profile.notes.all %}
+        <tr>
+            <td>
+                {{ n.date }}
+            </td>
+            <td>
+                {{ n.text }}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <a href="/">Tilbage</a>
+
 {% endblock %}
 
 
