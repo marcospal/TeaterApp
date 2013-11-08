@@ -15,7 +15,7 @@ from django.utils.timezone import utc
 
 
 
-from models import Profile, Question, Rating, QuestionCount, Location, VisitCount
+from models import Profile, Question, Rating, QuestionCount, Location, VisitCount, Scale
 
 
 #This is the main entrypoint of the application
@@ -120,6 +120,13 @@ def baseinfo(request):
         
         profile = Profile(user=request.user, name=_name, birth=datetime.date(_year,_month,_day) , gender=_sex)
         profile.save()
+
+        print "creating default ratings"
+        for s in Scale.objects.all():
+            print s
+            r = Rating(profile=profile, scale=s)
+            r.save()
+
         return HttpResponseRedirect('/')
     except:
         pass
@@ -312,9 +319,6 @@ def directions(request):
         profile.save()
         return HttpResponseRedirect('/')
 
-    now1 = datetime.datetime.utcnow().replace()
-    now2 = datetime.datetime.utcnow().replace()
-
     age = (datetime.datetime.now() - profile.location_set_time).seconds
     
 
@@ -338,7 +342,8 @@ def overview(request):
     c = {
         'STATIC_URL': settings.STATIC_URL,
         'title': "overview",
-        'locations': locations
+        'locations': locations,
+        'free_profiles' : Profile.objects.filter(active=True, location__isnull=True)
     }
     return render_to_response('overview.html', c, context_instance=RequestContext(request))
 

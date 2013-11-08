@@ -258,6 +258,9 @@ class Rating(models.Model):
     scale = models.ForeignKey(Scale)
     value = models.IntegerField(default=5)
 
+    class Meta:
+        unique_together = ('profile', 'scale')
+
     def __unicode__(self):
         return "%s %s - %s: %d" % (self.profile.user.username, self.profile.name, self.scale.name, self.value)
 
@@ -269,6 +272,9 @@ class Parameter(models.Model):
     location = models.ForeignKey(Location)
     scale = models.ForeignKey(Scale)
     value = models.IntegerField(default=5)
+
+    class Meta:
+        unique_together = ('location', 'scale')
 
     def __unicode__(self):
         return "%s" % (self.location.name)
