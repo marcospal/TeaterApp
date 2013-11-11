@@ -131,7 +131,17 @@
 
 
 {% block javascript %}
-
+    //Check version periodically
+    var intervalID = setInterval(
+        function()
+        { 
+            $.get('/profile/{{profile.id}}/version/', 
+                function(data)
+                { 
+                    if(data.version != {{profile.version}})
+                        window.location.reload(); 
+                },'json');
+        }, 5000);
 {% endblock %}
 
 

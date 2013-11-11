@@ -12,8 +12,7 @@ import re
 import pdb
 import datetime
 from django.utils.timezone import utc
-
-
+from django.utils import simplejson
 
 from models import Profile, Question, Rating, QuestionCount, Location, VisitCount, Scale
 
@@ -277,6 +276,8 @@ def choose(request):
                 profile.location = location
                 profile.location_set_time = datetime.datetime.now()
                 profile.save()
+                location.version += 1
+                location.save()
                 return HttpResponseRedirect('/')
         else:
             print "unknown location"
@@ -321,6 +322,12 @@ def directions(request):
         qc.times += 1
         qc.save()
 
+        profile.version += 1
+        profile.force_questions = 5
+        profile.save()
+        profile.location.version+=1
+        profile.location.save()
+
         profile.location = None
 
         profile.save()
@@ -341,18 +348,40 @@ def directions(request):
 
 #admin views below
 
+def getOverviewVersion():
+    v = 0
+    for l in Location.objects.all():
+        v += l.version
+    for p in Profile.objects.filter(active=True):
+        v += p.version
+    return v
+
+
 @staff_member_required
 def overview(request):
     
     locations = Location.objects.all()
 
+    print request.POST
+
     c = {
         'STATIC_URL': settings.STATIC_URL,
         'title': "overview",
         'locations': locations,
-        'free_profiles' : Profile.objects.filter(active=True, location__isnull=True)
+        'free_profiles' : Profile.objects.filter(active=True, location__isnull=True),
+        'version': getOverviewVersion()
     }
     return render_to_response('overview.html', c, context_instance=RequestContext(request))
+
+
+@staff_member_required
+def overviewversion(request):
+    return HttpResponse(simplejson.dumps(
+        {
+            'version': getOverviewVersion()
+        }), mimetype='application/json')
+    
+
 
 @staff_member_required
 def location(request, id):
@@ -362,27 +391,63 @@ def location(request, id):
     except:
         return HttpResponseRedirect('/')
 
+
+    print request.POST
+
     #Allow location owner to adjust profile    
-    l = request.POST.get('location');
     p = request.POST.get('profile');
     a = request.POST.get('action');
-    if(l != None and p != None and a != None):
-        p = Profile.objects.get(id=int(p))
-        l = Location.objects.get(id=int(l))
-        r = None
-        try:
-            r = Rating.objects.get(profile=p, scale=l.scale)
-        except Rating.DoesNotExist:
-            r = Rating(profile=p, location=l.scale)
+    if(a != None):
+        
+        if p != None:
+            p = Profile.objects.get(id=int(p))
+            r = None
+            try:
+                r = Rating.objects.get(profile=p, scale=location.scale)
+            except Rating.DoesNotExist:
+                r = Rating(profile=p, location=location.scale)
+            if a == '+':
+                r.value = min(9, r.value + 1)
+                r.save()
+                print "add"
+                location.version += 1
+                location.save()
+            if a == '-':
+                r.value = max(1, r.value - 1)
+                r.save()
+                print "sub"
+                location.version += 1
+                location.save()
+       
+        if a == 'close':
+            for p in location.profiles.all():
+                p.location = None
+                p.force_questions = 5
+                p.version += 1
 
-        if a == '+':
-            r.value = min(9, r.value + 1)
-            r.save()
-            print "add"
-        if a == '-':
-            r.value = max(1, r.value - 1)
-            r.save()
-            print "sub"
+                #record where people have been
+                try:
+                    v = VisitCount.objects.get(profile=p, location=location)
+                    v.times += 1
+                    v.save()
+                except:
+                    v = VisitCount(profile=p, location=location)
+                    v.save()
+
+                p.save()
+            location.state = Location.CLOSED
+            location.version += 1
+            location.save()
+        if a == 'open':
+            location.state = Location.OPEN_FOR_VISITORS
+            location.version += 1
+            location.save()
+        if a == 'start':
+            location.state = Location.IN_SESSION
+            location.version += 1
+            location.save()
+
+
 
     c = {
         'STATIC_URL': settings.STATIC_URL,
@@ -390,6 +455,19 @@ def location(request, id):
         'location': location
     }
     return render_to_response('location.html', c, context_instance=RequestContext(request))
+
+@staff_member_required
+def locationversion(request, id):
+    location = None
+    try:
+        location = Location.objects.get(id=id)
+    except:
+        return HttpResponseRedirect('/')
+    return HttpResponse(simplejson.dumps(
+        {
+            'version': location.version
+        }), mimetype='application/json')
+    
 
 @staff_member_required
 def profile(request, id):
@@ -417,11 +495,14 @@ def profile(request, id):
             r.value = min(9, r.value + 1)
             r.save()
             print "add"
+            profile.version+=1
+            profile.save()
         if a == '-':
             r.value = max(1, r.value - 1)
             r.save()
             print "sub"
-
+            profile.version+=1
+            profile.save()
 
     c = {
         'STATIC_URL': settings.STATIC_URL,
@@ -431,4 +512,33 @@ def profile(request, id):
     }
     return render_to_response('profile.html', c, context_instance=RequestContext(request))
     
+
+@staff_member_required
+def profileversion(request, id):
+    profile = None
+    try:
+        profile = Profile.objects.get(id=id)
+    except:
+        return HttpResponseRedirect('/')
+    return HttpResponse(simplejson.dumps(
+        {
+            'version': profile.version
+        }), mimetype='application/json')
+
+
+@staff_member_required
+def reset(request):
+    reset = request.POST.get('reset')
+
+    print request.POST
+    a = request.POST.get('action')
+    if a == 'reset':
+        for p in Profile.objects.filter(active=True):
+            p.active = False
+            p.save()
+        for l in Location.objects.all():
+            l.state = Location.CLOSED
+            l.save()
+        return HttpResponseRedirect('/')
+    return render_to_response('reset.html', {}, context_instance=RequestContext(request))
 

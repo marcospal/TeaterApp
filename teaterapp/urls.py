@@ -11,12 +11,15 @@ urlpatterns = patterns('',
 
     #Administrator overview
     url(r'^overview/$', 'teaterapp.show.views.overview', name='overview'),
+    url(r'^overview/version/$', 'teaterapp.show.views.overviewversion', name='overviewversion'),
     
     #Administrator location
     url(r'^location/(?P<id>\d+)/$', 'teaterapp.show.views.location', name='location'),
+    url(r'^location/(?P<id>\d+)/version/$', 'teaterapp.show.views.locationversion', name='locationversion'),
 
     #Administrator inspect profile
     url(r'^profile/(?P<id>\d+)/$', 'teaterapp.show.views.profile', name='profile'),
+    url(r'^profile/(?P<id>\d+)/version/$', 'teaterapp.show.views.profileversion', name='profileversion'),
     
     #users without profile is sent here to create one    
     url(r'^baseinfo/$', 'teaterapp.show.views.baseinfo', name='baseinfo'),
@@ -33,5 +36,9 @@ urlpatterns = patterns('',
     #We logout here
     url(r'^logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'}),
     
+    #Reset
+    url(r'^reset/$', 'teaterapp.show.views.reset', name='reset'),
+    
+
     url(r'^admin/', include(admin.site.urls)),
 )

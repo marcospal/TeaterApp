@@ -21,8 +21,7 @@ class Question(models.Model):
     #if a leading answer exist this question cant start
     leading_answer = models.OneToOneField('Answer', related_name='next_question', unique=True, blank=True, null=True)
     
-
-
+    
     def __unicode__(self):
         
         a = ''
@@ -85,9 +84,9 @@ class Location(models.Model):
     #state of location
     CLOSED, OPEN_FOR_VISITORS, IN_SESSION, NUM_PHASES = range(4)
     PHASES = (
-        (CLOSED, 'Closed'),
-        (OPEN_FOR_VISITORS, 'Open for visitors'),
-        (IN_SESSION, 'Closed'),
+        (CLOSED, 'Lukket'),
+        (OPEN_FOR_VISITORS, 'AAben'),
+        (IN_SESSION, 'Scenen er igang'),
     )
     def stateStr(self):
         for a,b in self.PHASES:
@@ -101,8 +100,8 @@ class Location(models.Model):
 
     parameters = models.ManyToManyField(Scale, through='Parameter')    
     
-
-
+    version = models.IntegerField(default=0)
+    
     def __unicode__(self):
         return "%s - Kapacitet: %d - Skala: %s - Safe: %s" % (self.name, self.capacity, self.scale, self.safe)
 
@@ -150,7 +149,7 @@ class Location(models.Model):
     @staticmethod
     def getAvailableLocations(profile):
         #find all possible locations (OPEN_FOR_VISITORS, and available seats)
-        locations = Location.objects.annotate(visitor_count=Count('visitors')).filter(state=Location.OPEN_FOR_VISITORS)
+        locations = Location.objects.annotate(visitor_count=Count('profiles')).filter(state=Location.OPEN_FOR_VISITORS)
         
 
         #order them in relation to this profile
@@ -224,6 +223,7 @@ class Profile(models.Model):
     
     ratings = models.ManyToManyField(Scale, through='Rating')    
     
+    version = models.IntegerField(default=0)
     
 
     #location related

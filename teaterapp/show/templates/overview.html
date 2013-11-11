@@ -45,15 +45,19 @@
                     {% endif %}
                 </td>
                 <td>
-                    dropdown
+                    {% for l in f.possible %}
+                        {{ l.name }}
+                    {% endfor %}
                 </td>
                 
             </tr>
         {% endfor %}
     </table>
 
+    <br>
+
     {% for l in locations%}
-    <a href="/location/{{l.id}}/">{{ l.name }}</a>
+    <a href="/location/{{l.id}}/">{{ l.name }} - {{ l|statestr}}</a>
 
 
 
@@ -99,16 +103,30 @@
             {% endfor %}
         </table>
 
+        <br>
 
     {% endfor %}
 
+
+    <!-- <a href="/reset/"> Reset </a> -->
+        
 
     
 {% endblock %}
 
 
 {% block javascript %}
-
+    //Check version periodically
+    var intervalID = setInterval(
+        function()
+        { 
+            $.get('/overview/version/', 
+                function(data)
+                { 
+                    if(data.version != {{version}})
+                        window.location.reload(); 
+                },'json');
+        }, 5000);
 {% endblock %}
 
 

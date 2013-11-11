@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load show_extras %}
+{% block body %}
+    
+    <h1>Er du helt sikker på at du vil deaktivere alle profiler?</h1>
+    <form method="post">
+    {% csrf_token %}
+        <button name="action" value="reset" class="btn btn-primary">Reset</button>
+    </form>
+
+    
+
+    
+{% endblock %}
+
+
+{% block javascript %}
+    //Check version periodically
+    var intervalID = setInterval(
+        function()
+        { 
+            $.get('/overview/version/', 
+                function(data)
+                { 
+                    if(data.version != {{version}})
+                        window.location.reload(); 
+                },'json');
+        }, 5000);
+{% endblock %}
+
+
+

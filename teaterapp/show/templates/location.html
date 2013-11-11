@@ -9,6 +9,7 @@
     {{ location|statestr }}
 
 
+
      <table border="1">
             <tr>
                 <td>
@@ -59,18 +60,46 @@
                             <form method="post" id="form" class="form-horizontal" role="form">
                                 {% csrf_token %}
                                 <input type="hidden" name="profile" value="{{ p.id }}">
-                                <input type="hidden" name="location" value="{{ location.id }}">
-
+                                
                                 <INPUT type="submit" value="-" name="action"  class="btn btn-primary"> 
                                 {{ p|scaleval:location.scale }}
                                 <INPUT type="submit" value="+" name="action"  class="btn btn-primary"> 
                             </form>
+                        
                         </td>
                     {% endif%}
                     </tr>
                 {% endif %}
             {% endfor %}
         </table>
+
+        {% if location.state == 0 %}
+           <form method="post" id="form" class="form-horizontal" role="form">
+                {% csrf_token %}
+                <input type="hidden" name="location" value="{{ location.id }}">
+                <button name="action" value="open" class="btn btn-primary">Åben lokation</button>
+            </form>
+
+        {% endif %}
+        
+        {% if location.state == 1 %}
+            <form method="post" id="form" class="form-horizontal" role="form">
+                {% csrf_token %}
+                <input type="hidden" name="location" value="{{ location.id }}">
+                <button name="action" value="start" class="btn btn-primary">Begynd scene</button>
+            </form>
+
+        {% endif %}
+        
+        {% if location.state == 2 %}
+            <form method="post" id="form" class="form-horizontal" role="form">
+                {% csrf_token %}
+                <input type="hidden" name="location" value="{{ location.id }}">
+                <button name="action" value="close" class="btn btn-primary">Afslut scene</button>
+            </form>
+
+        {% endif %}
+        
 
 
 <a href="/">Tilbage</a>
@@ -79,6 +108,18 @@
 
 
 {% block javascript %}
+    
+    //Check version periodically
+    var intervalID = setInterval(
+        function()
+        { 
+            $.get('/location/{{location.id}}/version/', 
+                function(data)
+                { 
+                    if(data.version != {{location.version}})
+                        window.location.reload(); 
+                },'json');
+        }, 5000);
 
 {% endblock %}
 
