@@ -27,9 +27,9 @@
         </tr>
         </thead>
         {% for f in free_profiles%}
-            <tr>
+            <tr {% if f.locked %} class="danger "  {%endif%}>
                 <td>                    
-                     <a href="/profile/{{f.id}}/">{{f.name}}</a>
+                     <a href="/profile/{{f.id}}/">{{f.name}} </a>
                 <td>
                     {{ f|gender }}
                 </td>
@@ -39,10 +39,9 @@
                 <td>
                     {{ f.user.username }}
                 </td>
-                <td>
+                <td  {% if f.locked %} class="btn-danger" {% endif %}>
                     {% if f.locked %}
-                        Låst
-                    {% else %}
+                        <span class="glyphicon glyphicon-lock"> Låst</span>
 
                     {% endif %}
                 </td>
@@ -98,7 +97,7 @@
             </tr>
             </thead>
             {% for p in l.aciveProfiles.all %}
-                <tr>
+                <tr {% if p.locked %} class="danger" {%endif%}>
                     <td>                    
                         <a href="/profile/{{p.id}}/">{{p.name}}</a>
                     <td>
@@ -110,13 +109,16 @@
                     <td>
                         {{ p.user.username }}
                     </td>
-                    <td>
-                        {% if p.locked %}
-                            Låst
-                        {% else %}
+                  
 
-                        {% endif %}
-                    </td>
+                    <td  {% if p.locked %} class="btn-danger" {% endif %}>
+                    {% if p.locked %}
+                        <span class="glyphicon glyphicon-lock"> Låst</span>
+
+                    {% endif %}
+                </td>
+
+                   
                 </tr>
             {% endfor %}
         </table>

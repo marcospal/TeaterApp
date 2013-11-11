@@ -34,7 +34,7 @@ class LocationAdmin(admin.ModelAdmin):
     ordering = ('name',)
     search_fields = ('name',)
     inlines = [ LocationScaleInLine, ]
-    exclude = ('version','priority')
+    exclude = ('version',)
 admin.site.register(Location, LocationAdmin)
 
 class ProfileScaleInLine(admin.TabularInline):

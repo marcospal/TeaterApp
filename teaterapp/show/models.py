@@ -139,7 +139,7 @@ class Location(models.Model):
             
             #print "room has ", p.value, " profile has ", r, " difference = ", p.value - r
             
-            score += p.value - r
+            score += r - p.value
             n += 1
         if n > 0:
             score /= n
