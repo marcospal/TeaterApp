@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Count
 import datetime
+from django.conf import settings
 
 
 class Scale(models.Model):
@@ -191,7 +192,7 @@ class Location(models.Model):
             print 'Visitors: ',l.visitors.all()
             print 'Visitors count: ',l.visitor_count
 
-        return tmp
+        return tmp[0:settings.MAX_ROOM_OFFERED]
 
  
 class Profile(models.Model):

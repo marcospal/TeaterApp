@@ -130,7 +130,7 @@
         {% for l in next %}
         <tr>
             <td>
-                {{ l.name }}
+                <a href="/location/{{ l.id }}/">{{ l.name }}</a>
             </td>
             <td>
                 {{ l|getscore:profile }}
@@ -139,7 +139,23 @@
         {% endfor %}
     </table>
     
+    <h4>idligere besøgte rum:</h4>
+    <table class="table table-bordered table-striped table-hover">
+        <tr>
+            <td>
+                Lokation
+            </td>
+        </tr>
 
+        {% for l in prev %}
+        <tr>
+            <td>
+                <a href="/location/{{ l.id }}/">{{ l.name }}</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    
 
 
 

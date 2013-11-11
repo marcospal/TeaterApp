@@ -573,11 +573,14 @@ def profile(request, id):
                 profile.version+=1
                 profile.save()
 
+    prev = profile.locations.all()
+
     c = {
         'STATIC_URL': settings.STATIC_URL,
         'title' : "profile",
         'profile' : profile,
         'next' : Location.getAvailableLocations(profile),
+        'prev' : prev,
         'AJAX_REFRESH_INTERVAL' : settings.AJAX_REFRESH_INTERVAL,  
     }
     return render_to_response('profile.html', c, context_instance=RequestContext(request))

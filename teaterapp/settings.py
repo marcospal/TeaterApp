@@ -30,6 +30,8 @@ USER_FORCED_QUESTIONS = 1
 AJAX_REFRESH_INTERVAL = 15000
 USER_SELF_CONTINUE = 60*5
 
+MAX_ROOM_OFFERED = 3
+
 
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
