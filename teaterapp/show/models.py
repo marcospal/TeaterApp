@@ -2,12 +2,19 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Count
 import datetime
+from colorfield.fields import ColorField
 
 class Scale(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=256, help_text='General name of the scale.')
     def __unicode__(self):
         return "%s" % (self.name)
+
+class Color(models.Model):
+    title = models.CharField(u'Title', max_length=250)
+    color = ColorField(default='ffffff')
+    def __unicode__(self):
+        return "%s" % (self.title)
 
 #Quiz
 class Question(models.Model):

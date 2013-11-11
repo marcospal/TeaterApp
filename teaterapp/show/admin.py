@@ -11,6 +11,12 @@ admin.site.unregister(Group)
 admin.site.unregister(Site)
 
 
+class ColorAdmin(admin.ModelAdmin):
+    ordering = ('title',)
+    search_fields = ('title',)
+admin.site.register(Color, ColorAdmin)
+
+
 class ScaleAdmin(admin.ModelAdmin):
     ordering = ('name',)
     search_fields = ('name',)

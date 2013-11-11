@@ -39,6 +39,9 @@ urlpatterns = patterns('',
     #Reset
     url(r'^reset/$', 'teaterapp.show.views.reset', name='reset'),
     
+    #color thingie
+    url(r'^color/$', 'teaterapp.show.views.color', name='color'),
+    url(r'^setcolor/(?P<color>\w+)/$', 'teaterapp.show.views.setcolor', name='setcolor'),
 
     url(r'^admin/', include(admin.site.urls)),
 )

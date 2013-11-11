@@ -14,7 +14,7 @@ import datetime
 from django.utils.timezone import utc
 from django.utils import simplejson
 
-from models import Profile, Question, Rating, QuestionCount, Location, VisitCount, Scale
+from models import Profile, Question, Rating, QuestionCount, Location, VisitCount, Scale, Color
 
 
 #This is the main entrypoint of the application
@@ -541,4 +541,26 @@ def reset(request):
             l.save()
         return HttpResponseRedirect('/')
     return render_to_response('reset.html', {}, context_instance=RequestContext(request))
+
+
+def color(request):
+    color = "ffffff"
+    
+    try:
+        colorObj = Color.objects.all()[:1].get()
+        color = colorObj.color
+    except:
+        color = "ffffff"
+        pass
+    return render_to_response('color.html', {'color':color}, context_instance=RequestContext(request))
+
+def setcolor(request,color):
+    
+    try:
+        colorObj = Color.objects.all()[:1].get()
+        colorObj.color = color
+        colorObj.save()
+    except:
+        pass
+    return render_to_response('color.html', {'color':color}, context_instance=RequestContext(request))
 
