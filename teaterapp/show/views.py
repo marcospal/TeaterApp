@@ -163,8 +163,6 @@ def quiz(request):
     question = request.POST.get("question")
     answer = request.POST.get("answer")
     
-    if profile.location != None:
-        return HttpResponseRedirect('/')
     
     if question != None and answer != None:
         question = Question.objects.filter(id=int(float(question)))
@@ -187,9 +185,9 @@ def quiz(request):
                         profile.question = a.next_question
                     except Question.DoesNotExist:
                         profile.question = None
-                    print "next question found: %s" % (profile.question)
                     
-
+                    #print "next question found: %s" % (profile.question)
+                    
                     profile.given_answers.add(a)
 
                     qc = None
@@ -200,8 +198,6 @@ def quiz(request):
                     qc.times += 1
                     qc.save()
 
-                    print "aaa"
-
                     if a.scale != None:
                         r = None
                         try:
@@ -210,8 +206,6 @@ def quiz(request):
                             r = Rating(profile=profile, scale=a.scale)
                         r.value += a.modifier
                         r.save()
-
-                    print "bbb"
 
                     profile.force_questions -= 1
                     if profile.force_questions < 0:
@@ -223,15 +217,15 @@ def quiz(request):
             else:
                 print "answering non pending question"
     
-    print len(Location.getAvailableLocations(profile))
-
-    if profile.force_questions <= 0 and len(Location.getAvailableLocations(profile)) > 0:
-        profile.question = None
-        profile.save()
-        return HttpResponseRedirect('/');
-
+    
     #Find what question to ask
     if not profile.question:
+        if (profile.force_questions <= 0 and len(Location.getAvailableLocations(profile)) > 0) or profile.location != None:
+            profile.question = None
+            profile.save()
+            return HttpResponseRedirect('/');
+
+
         #find all possible questions
         questions = Question.objects.filter(leading_answer__isnull=True)
         
