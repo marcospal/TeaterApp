@@ -36,6 +36,11 @@ urlpatterns = patterns('',
     #We logout here
     url(r'^logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'}),
     
+
+    #Go to gate
+    url(r'^gotogate/$', 'teaterapp.show.views.gotogate', name='gotogate'),
+    
+
     #Reset
     url(r'^reset/$', 'teaterapp.show.views.reset', name='reset'),
     

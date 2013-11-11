@@ -15,17 +15,7 @@
 
 
 {% block javascript %}
-    //Check version periodically
-    var intervalID = setInterval(
-        function()
-        { 
-            $.get('/overview/version/', 
-                function(data)
-                { 
-                    if(data.version != {{version}})
-                        window.location.reload(); 
-                },'json');
-        }, 5000);
+    
 {% endblock %}
 
 

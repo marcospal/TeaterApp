@@ -114,7 +114,6 @@
 
 
 {% block javascript %}
-    
     //Check version periodically
     var intervalID = setInterval(
         function()
@@ -125,7 +124,8 @@
                     if(data.version != {{location.version}})
                         window.location.reload(); 
                 },'json');
-        }, 5000);
+        }, {{ AJAX_REFRESH_INTERVAL }});
+
 
 {% endblock %}
 

@@ -4,6 +4,7 @@ from django.db.models import Count
 import datetime
 from colorfield.fields import ColorField
 
+
 class Scale(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=256, help_text='General name of the scale.')
@@ -113,7 +114,7 @@ class Location(models.Model):
 
     parameters = models.ManyToManyField(Scale, through='Parameter')    
     
-    version = models.IntegerField(default=0)
+    version = models.IntegerField(default=1)
     
     def __unicode__(self):
         return "%s - Kapacitet: %d - Skala: %s - Safe: %s" % (self.name, self.capacity, self.scale, self.safe)
@@ -164,13 +165,15 @@ class Location(models.Model):
         #find all possible locations (OPEN_FOR_VISITORS, and available seats)
         locations = Location.objects.annotate(visitor_count=Count('profiles')).filter(state=Location.OPEN_FOR_VISITORS)
         
-
         #order them in relation to this profile
         def score(a):
             return a.getscore(profile)
         
+
         tmp = []
         for l in list(locations):
+            print l.capacity
+
             if l.capacity > l.visitor_count:
                 if l.safe:
                     print profile.locked
@@ -236,7 +239,7 @@ class Profile(models.Model):
     
     ratings = models.ManyToManyField(Scale, through='Rating')    
     
-    version = models.IntegerField(default=0)
+    version = models.IntegerField(default=1)
     
 
     #location related

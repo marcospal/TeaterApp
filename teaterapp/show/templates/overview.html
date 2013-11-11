@@ -47,9 +47,21 @@
                     {% endif %}
                 </td>
                 <td>
-                    {% for l in f.possible %}
-                        {{ l.name }}
-                    {% endfor %}
+                    <form method="post" id="form" class="form-horizontal" role="form">
+                        
+                        {% csrf_token %}
+                        
+                        <input type="hidden" name="profile" value="{{ f.id }}" id="name">
+                        <select name="location">
+                        <option>Vælg en</option>
+                        {% for l in locations %}
+                            <option value="{{ l.id }}">{{ l.name }}</option>
+                        {% endfor %}
+                        </select>
+                        <input type="submit" value="Send!">
+
+                        
+                    </form>
                 </td>
                 
             </tr>
@@ -132,7 +144,8 @@
                     if(data.version != {{version}})
                         window.location.reload(); 
                 },'json');
-        }, 5000);
+        }, {{ AJAX_REFRESH_INTERVAL }});
+
 {% endblock %}
 
 
