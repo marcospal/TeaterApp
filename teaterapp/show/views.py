@@ -110,28 +110,28 @@ def baseinfo(request):
     _year = request.POST.get('year') ;
 
     if _code != None and _name != None and _sex != None and _day != None and _month != None and _year != None:
-        print _code, _name, _sex, _day, _month, _year
+        #print _code, _name, _sex, _day, _month, _year
 
         for a,b in Profile.GENDERS:
             if b == _sex:
                 _sex = a
         
-        print _sex
+        #print _sex
 
         _year = int(float(_year))
         _month = int(float(_month))
         _day = int(float(_day))
 
-        print _year, _month, _day
+        #print _year, _month, _day
 
         d = datetime.date(_year,_month, _day)
-        print d
+        #print d
         profile = Profile(user=request.user, name=_name, birth=d, gender=_sex, force_questions=settings.USER_FORCED_QUESTIONS)
         profile.save()
 
-        print "creating default ratings"
+        #print "creating default ratings"
         for s in Scale.objects.all():
-            print s
+            #print s
             r = Rating(profile=profile, scale=s)
             r.save()
 
