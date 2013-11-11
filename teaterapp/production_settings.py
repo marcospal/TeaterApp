@@ -28,7 +28,7 @@ STATIC_URL = 'http://static.contabile2.kanako.dk/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
-    '/home/tax/webapps/contabile2/TeaterApp/teaterapp/static/',
+    '/home/tax/webapps/contabile2test/TeaterApp/teaterapp/static/',
     #'/Users/jesper/TeaterApp/teaterapp/static',
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
