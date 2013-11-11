@@ -140,7 +140,7 @@ def baseinfo(request):
 
     c = {
 
-
+        #'user':request.user,
         'STATIC_URL': settings.STATIC_URL,
         'title': "baseinfo",
         'code': request.user.username,

@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 
 {% block body %}
-<p>
-    Du er henvist til <strong>{{ location.name }}</strong></p>
+<h3>
+    Du er henvist til <strong>{{ location.name }}</strong></h3>
     <p>{{location.directions}}</p>
 
 
@@ -30,10 +30,7 @@
     {% endif %}
 
 <br/>
-<p><strong>Udvikler info:</strong>
-    Score: {{ score }}, priority: 
-    {{ location.priority }}, age: {{ age }}
-    </p>
+
 {% endblock %}
 
 

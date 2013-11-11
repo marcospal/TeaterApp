@@ -29,8 +29,11 @@
   <div class="container">
    <h1>Ord Mellem Rum</h1>
    <p>
-   
-   {%if profile %} <h4><strong>Du er:</strong> {{profile.name}} (login: {{profile.user.username}}) <a href="/logout/" class="btn btn-xs btn-danger"> Log ud </a></h4> {% endif %}
+   {% if user %}
+        <h4><strong>Du er:</strong> {{user.username}} <a href="/logout/" class="btn btn-xs btn-danger"> Log ud </a></h4>  
+   {% elif profile%}
+        <h4><strong>Du er:</strong> {{profile.name}} (login: {{profile.user.username}}) <a href="/logout/" class="btn btn-xs btn-danger"> Log ud </a></h4> 
+    {% endif %}
    <br/>
    </p>
     <div class="well">
