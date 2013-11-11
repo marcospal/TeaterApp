@@ -25,7 +25,9 @@
 $("#codeID").keyup(function(){
     this.value = this.value.toUpperCase().replace(/\W/g, '');
 });
-
+$(function() {
+  $("#codeID").focus();
+});
 {% endblock %}
 
 
