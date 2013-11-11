@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block body %}
+<p>
+    Du er henvist til <strong>{{ location.name }}</strong></p>
+    <p>{{location.directions}}</p>
+
+
+   
+<br/>
+
+    
+    {% if age > USER_SELF_CONTINUE %}
+    <p>
+    Hvs du har besøgt lokationen og er færdig tryk videre.<br>
+    </p>
+    
+
+    
+
+    <form method="post">
+
+        {% csrf_token %}
+            
+        <INPUT type="submit" value="Videre" name="done" class= "btn btn-primary btn-lg btn-block"> 
+        
+
+
+    </form>
+    {% endif %}
+
+<br/>
+<p><strong>Udvikler info:</strong>
+    Score: {{ score }}, priority: 
+    {{ location.priority }}, age: {{ age }}
+    </p>
+{% endblock %}
+
+
+{% block javascript %}
+    idleTime = 0;
+    $(document).ready(function () 
+    {
+        //Increment the idle time counter every minute.
+        var idleInterval = setInterval(timerIncrement, 1000); 
+
+        //Zero the idle timer on mouse movement.
+        $(this).mousemove(function (e) {
+            idleTime = 0;
+        });
+        $(this).keypress(function (e) {
+            idleTime = 0;
+        });
+    });
+    function timerIncrement() 
+    {
+        idleTime = idleTime + 1;
+        if (idleTime > {{ USER_TIMEOUT_SECONDS }}) 
+        {
+            window.location = "/logout/";
+        }
+    }
+
+
+    //Check version periodically
+    var intervalID = setInterval(
+        function()
+        { 
+            $.get('/profile/{{profile.id}}/version/', 
+                function(data)
+                { 
+                    if(data.version != {{profile.version}})
+                        window.location.reload(); 
+                },'json');
+        }, {{ AJAX_REFRESH_INTERVAL }});
+
+
+{% endblock %}
+
+
+

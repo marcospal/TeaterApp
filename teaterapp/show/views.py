@@ -364,6 +364,20 @@ def directions(request):
     }
     return render_to_response('directions.html', c, context_instance=RequestContext(request))
 
+
+
+def gotogate(request):
+    c = {
+        'STATIC_URL': settings.STATIC_URL,
+        'profiles' : Profile.objects.filter(active=True),
+        'USER_TIMEOUT_SECONDS' : settings.USER_TIMEOUT_SECONDS,
+        'AJAX_REFRESH_INTERVAL' : settings.AJAX_REFRESH_INTERVAL,
+        'USER_SELF_CONTINUE' : settings.USER_SELF_CONTINUE,
+           
+    }
+    return render_to_response('gotogate.html', c, context_instance=RequestContext(request))
+
+
 #admin views below
 
 def getOverviewVersion():
@@ -593,4 +607,6 @@ def reset(request):
             l.save()
         return HttpResponseRedirect('/')
     return render_to_response('reset.html', {}, context_instance=RequestContext(request))
+
+
 
