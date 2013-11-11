@@ -27,8 +27,14 @@ class Question(models.Model):
         a = ''
         for ans in self.possible_answers.all():
             a += ans.text + " "
-        return "%d %d %s ( %s)" % (self.id, self.priority, self.text, a)
+        return "%d (%d) %s ( %s)" % (self.getPriority() ,self.id, self.text, a)
 
+
+    def getPriority(self):
+        if self.leading_answer:
+            return self.leading_answer.question.getPriority()
+        else:
+            return self.priority
 
     def getscore(self, profile):
         score = self.priority
