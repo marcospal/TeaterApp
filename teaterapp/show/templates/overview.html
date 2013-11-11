@@ -1,29 +1,31 @@
 {% extends "base.html" %}
 {% load show_extras %}
 {% block body %}
-    Frie profiler
-    <table border="1">
+    <h4>Frie deltagere:</h4>
+    <table class="table table-bordered table-striped table-hover">
+    <thead>
         <tr>
-            <td>
+            <th>
                 Navn
-            </td>
-            <td>
+            </th>
+            <th>
                 Køn
-            </td>
-            <td>
+            </th>
+            <th>
                 Alder
-            </td>
-            <td>
+            </th>
+            <th>
                 Kode
-            </td>
-            <td>
+            </th>
+            <th>
                 Noter/Låst
-            </td>
-            <td>
+            </th>
+            <th>
                 Send til lokation
-            </td>
+            </th>
             
         </tr>
+        </thead>
         {% for f in free_profiles%}
             <tr>
                 <td>                    
@@ -51,30 +53,32 @@
             </tr>
         {% endfor %}
     </table>
-
+    <h3>Lokationer:</h3>
     {% for l in locations%}
-    <a href="/location/{{l.id}}/">{{ l.name }}</a>
+    <h4><a href="/location/{{l.id}}/">{{ l.name }}</a></h4>
 
 
 
-        <table border="1">
+       <table class="table table-bordered table-striped table-hover">
+       <thead>
             <tr>
-                <td>
+                <th>
                     Navn
-                </td>
-                <td>
+                </th>
+                <th>
                     Køn
-                </td>
-                <td>
+                </th>
+                <th>
                     Alder
-                </td>
-                <td>
+                </th>
+                <th>
                     Kode
-                </td>
-                <td>
+                </th>
+                <th>
                     Noter/Låst
-                </td>
+                </th>
             </tr>
+            </thead>
             {% for p in l.aciveProfiles.all %}
                 <tr>
                     <td>                    

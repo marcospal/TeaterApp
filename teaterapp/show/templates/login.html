@@ -6,10 +6,15 @@
 <br/>
     <form method="post">
         {% csrf_token %}
-        Dit login: <input type="text" name="code" id="codeID" maxlength="6"><br>
-    </form>
+        Dit login: <input type="text" name="code" id="codeID" maxlength="6" style="text-transform:uppercase;"/><br>
+
     <br/>
 <p class="text-muted">Dit login er de 6 første tal/bogstaver på din billet. </p>
+
+        <INPUT class= "btn btn-primary btn-lg " " type="submit" value="Start" name="start"/> 
+
+    </form>
+
 
 {% endblock %}
 

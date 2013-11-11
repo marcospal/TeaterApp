@@ -3,8 +3,9 @@
 
 {% block body %}
     
-    Profil
-    <table border="1">
+    <h4>Profil</h4>
+    <table class="table table-bordered table-striped table-hover">
+
         <tr>
             <td>
                 Navn:
@@ -43,8 +44,8 @@
         </tr>
     </table>
 
-    Karakterblad:
-    <table border="1">
+    <h4>Skalaer:</h4>
+    <table class="table table-bordered table-striped table-hover">
         {% for r in profile.rating_set.all %}
         <tr>
             <td>
@@ -66,8 +67,8 @@
         {% endfor %}
     </table>
 
-    Noter:
-    <table border="1">
+    <h4>Noter:</h4>
+    <table class="table table-bordered table-striped table-hover">
         <tr>
             <td>
                 Dato
@@ -88,7 +89,7 @@
         {% endfor %}
     </table>
 
-    Nuværende rum:<br>
+    <h4>Nuværende rum:</h4>
     {% if profile.location %}
         {{ profile.location.name }}
     {% else %}
@@ -97,8 +98,8 @@
     <br>
 
 
-    Næste mulige rum:
-    <table border="1">
+    <h4>Næste mulige rum:</h4>
+    <table class="table table-bordered table-striped table-hover">
         <tr>
             <td>
                 Lokation
