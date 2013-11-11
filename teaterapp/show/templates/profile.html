@@ -68,6 +68,9 @@
     </table>
 
     <h4>Noter:</h4>
+
+    {% if profile.notes.count > 0 %}
+
     <table class="table table-bordered table-striped table-hover">
         <tr>
             <td>
@@ -88,6 +91,16 @@
         </tr>
         {% endfor %}
     </table>
+    {% endif %}
+
+    <form method="post">
+         {% csrf_token %}
+        <input type="hidden" name="profile" value="{{ profile.id }}" id="name">
+        <input type="textarea" name="note" value="Skriv note her">
+        <button>Tilføj note</button>
+    </form>
+
+
 
     <h4>Nuværende rum:</h4>
     {% if profile.location %}
@@ -142,7 +155,7 @@
                     if(data.version != {{profile.version}})
                         window.location.reload(); 
                 },'json');
-        }, 5000);
+        }, {{ AJAX_REFRESH_INTERVAL }});
 {% endblock %}
 
 

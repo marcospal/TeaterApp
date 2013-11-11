@@ -25,6 +25,11 @@ LOGIN_URL = '/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_URL = '/logout/'
 
+USER_TIMEOUT_SECONDS = 120
+USER_FORCED_QUESTIONS = 1
+AJAX_REFRESH_INTERVAL = 15000
+USER_SELF_CONTINUE = 60*5
+
 
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False

@@ -46,7 +46,7 @@
     function timerIncrement() 
     {
         idleTime = idleTime + 1;
-        if (idleTime > 10) 
+        if (idleTime > {{ USER_TIMEOUT_SECONDS }}) 
         {
             window.location = "/logout/";
         }

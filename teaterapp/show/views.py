@@ -14,7 +14,7 @@ import datetime
 from django.utils.timezone import utc
 from django.utils import simplejson
 
-from models import Profile, Question, Rating, QuestionCount, Location, VisitCount, Scale
+from models import Profile, Question, Rating, QuestionCount, Location, VisitCount, Scale, Note
 
 
 #This is the main entrypoint of the application
@@ -126,7 +126,7 @@ def baseinfo(request):
 
         d = datetime.date(_year,_month, _day)
         print d
-        profile = Profile(user=request.user, name=_name, birth=d, gender=_sex)
+        profile = Profile(user=request.user, name=_name, birth=d, gender=_sex, force_questions=settings.USER_FORCED_QUESTIONS)
         profile.save()
 
         print "creating default ratings"
@@ -143,7 +143,8 @@ def baseinfo(request):
 
         'STATIC_URL': settings.STATIC_URL,
         'title': "baseinfo",
-        'code': request.user.username
+        'code': request.user.username,
+        'USER_TIMEOUT_SECONDS' : settings.USER_TIMEOUT_SECONDS
     }
     return render_to_response('baseinfo.html', c, context_instance=RequestContext(request))
 
@@ -162,22 +163,25 @@ def quiz(request):
     question = request.POST.get("question")
     answer = request.POST.get("answer")
     
+    if profile.location != None:
+        return HttpResponseRedirect('/')
+    
     if question != None and answer != None:
         question = Question.objects.filter(id=int(float(question)))
         if question.exists():
             question = question.get()
             
-            print "1>", question
-            print "2>", answer
-            print "3>", profile
+            #print "1>", question
+            #print "2>", answer
+            #print "3>", profile
 
 
             if question == profile.question:
                 a = question.possible_answers.filter(text=answer)
                 if a.exists():
                     a = a.get()
-                    print "found answer"
-                    print "--->",a
+                    #print "found answer"
+                    #print "--->",a
                     
                     try:
                         profile.question = a.next_question
@@ -196,6 +200,8 @@ def quiz(request):
                     qc.times += 1
                     qc.save()
 
+                    print "aaa"
+
                     if a.scale != None:
                         r = None
                         try:
@@ -204,6 +210,9 @@ def quiz(request):
                             r = Rating(profile=profile, scale=a.scale)
                         r.value += a.modifier
                         r.save()
+
+                    print "bbb"
+
                     profile.force_questions -= 1
                     if profile.force_questions < 0:
                         profile.force_questions = 0
@@ -214,6 +223,8 @@ def quiz(request):
             else:
                 print "answering non pending question"
     
+    print len(Location.getAvailableLocations(profile))
+
     if profile.force_questions <= 0 and len(Location.getAvailableLocations(profile)) > 0:
         profile.question = None
         profile.save()
@@ -246,6 +257,7 @@ def quiz(request):
         'STATIC_URL': settings.STATIC_URL,
         'title': "quiz",
         'question': profile.question,
+        'USER_TIMEOUT_SECONDS' : settings.USER_TIMEOUT_SECONDS
 
     }
     return render_to_response('quiz.html', c, context_instance=RequestContext(request))
@@ -290,6 +302,8 @@ def choose(request):
     c = {
         'STATIC_URL': settings.STATIC_URL,
         'choice': locations,
+        'USER_TIMEOUT_SECONDS' : settings.USER_TIMEOUT_SECONDS,
+        'AJAX_REFRESH_INTERVAL' : settings.AJAX_REFRESH_INTERVAL,
 
     }
     return render_to_response('choose.html', c, context_instance=RequestContext(request))
@@ -340,8 +354,12 @@ def directions(request):
         'STATIC_URL': settings.STATIC_URL,
         'title': "Directions",
         'location': profile.location,
+        'profile' : profile,
         'age': age,
-        'score': profile.location.getscore(profile)
+        'score': profile.location.getscore(profile),
+        'USER_TIMEOUT_SECONDS' : settings.USER_TIMEOUT_SECONDS,
+        'AJAX_REFRESH_INTERVAL' : settings.AJAX_REFRESH_INTERVAL,
+        'USER_SELF_CONTINUE' : settings.USER_SELF_CONTINUE,
            
     }
     return render_to_response('directions.html', c, context_instance=RequestContext(request))
@@ -364,12 +382,30 @@ def overview(request):
 
     print request.POST
 
+    profile = request.POST.get("profile")
+    location = request.POST.get("location")
+    if profile != None and location != None:
+        try:
+            profile = Profile.objects.get(id=profile)
+            location = Location.objects.get(id=location)
+            profile.location = location
+            profile.version += 1
+            profile.save()
+            location.version += 1
+            location.save()
+
+        except:
+            pass
+
+
+
     c = {
         'STATIC_URL': settings.STATIC_URL,
         'title': "overview",
         'locations': locations,
         'free_profiles' : Profile.objects.filter(active=True, location__isnull=True),
-        'version': getOverviewVersion()
+        'version': getOverviewVersion(),
+        'AJAX_REFRESH_INTERVAL' : settings.AJAX_REFRESH_INTERVAL,
     }
     return render_to_response('overview.html', c, context_instance=RequestContext(request))
 
@@ -452,7 +488,8 @@ def location(request, id):
     c = {
         'STATIC_URL': settings.STATIC_URL,
         'title': "location",
-        'location': location
+        'location': location,
+        'AJAX_REFRESH_INTERVAL' : settings.AJAX_REFRESH_INTERVAL,
     }
     return render_to_response('location.html', c, context_instance=RequestContext(request))
 
@@ -478,37 +515,51 @@ def profile(request, id):
         return HttpResponseRedirect('/')
 
     print request.POST
+    
+
+
+
+
     #Allow location owner to adjust profile    
     s = request.POST.get('scale');
     p = request.POST.get('profile');
     a = request.POST.get('action');
-    if(s != None and p != None and a != None):
+    n = request.POST.get('note');
+    
+    if p != None:
         p = Profile.objects.get(id=int(float(p)))
-        s = Scale.objects.get(id=int(float(s)))
-        r = None
-        try:
-            r = Rating.objects.get(profile=p, scale=s)
-        except Rating.DoesNotExist:
-            r = Rating(profile=p, location=s)
+        
+        if n != None:
+            n = Note(text=n, profile=p)
+            n.save()
 
-        if a == '+':
-            r.value = min(9, r.value + 1)
-            r.save()
-            print "add"
-            profile.version+=1
-            profile.save()
-        if a == '-':
-            r.value = max(1, r.value - 1)
-            r.save()
-            print "sub"
-            profile.version+=1
-            profile.save()
+        if(s != None  and a != None):
+            s = Scale.objects.get(id=int(float(s)))
+            r = None
+            try:
+                r = Rating.objects.get(profile=p, scale=s)
+            except Rating.DoesNotExist:
+                r = Rating(profile=p, location=s)
+
+            if a == '+':
+                r.value = min(9, r.value + 1)
+                r.save()
+                print "add"
+                profile.version+=1
+                profile.save()
+            if a == '-':
+                r.value = max(1, r.value - 1)
+                r.save()
+                print "sub"
+                profile.version+=1
+                profile.save()
 
     c = {
         'STATIC_URL': settings.STATIC_URL,
         'title' : "profile",
         'profile' : profile,
-        'next' : Location.getAvailableLocations(profile)   
+        'next' : Location.getAvailableLocations(profile),
+        'AJAX_REFRESH_INTERVAL' : settings.AJAX_REFRESH_INTERVAL,  
     }
     return render_to_response('profile.html', c, context_instance=RequestContext(request))
     
@@ -535,6 +586,7 @@ def reset(request):
     if a == 'reset':
         for p in Profile.objects.filter(active=True):
             p.active = False
+            p.location = None
             p.save()
         for l in Location.objects.all():
             l.state = Location.CLOSED

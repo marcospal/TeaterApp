@@ -10,7 +10,7 @@
 <br/>
 
     
-    {% if age > 5%}
+    {% if age > USER_SELF_CONTINUE %}
     <p>
     Hvs du har besøgt lokationen og er færdig tryk videre.<br>
     </p>
@@ -55,11 +55,26 @@
     function timerIncrement() 
     {
         idleTime = idleTime + 1;
-        if (idleTime > 10) 
+        if (idleTime > {{ USER_TIMEOUT_SECONDS }}) 
         {
             window.location = "/logout/";
         }
     }
+
+
+    //Check version periodically
+    var intervalID = setInterval(
+        function()
+        { 
+            $.get('/profile/{{profile.id}}/version/', 
+                function(data)
+                { 
+                    if(data.version != {{profile.version}})
+                        window.location.reload(); 
+                },'json');
+        }, {{ AJAX_REFRESH_INTERVAL }});
+
+
 {% endblock %}
 
 
