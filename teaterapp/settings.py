@@ -21,8 +21,8 @@ DATABASES = {
     }
 }
 
-LOGIN_URL = '/'
-LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = '/overview/'
+LOGIN_REDIRECT_URL = '/overview/'
 LOGOUT_URL = '/logout/'
 
 USER_TIMEOUT_SECONDS = 120

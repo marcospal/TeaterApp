@@ -248,6 +248,7 @@ def quiz(request):
 
 
     c = {
+        'profile': profile,
         'STATIC_URL': settings.STATIC_URL,
         'title': "quiz",
         'question': profile.question,
@@ -408,6 +409,7 @@ def overview(request):
 
 
     c = {
+        'profile' : profile,
         'STATIC_URL': settings.STATIC_URL,
         'title': "overview",
         'locations': locations,

@@ -2,32 +2,24 @@
 {% load show_extras %}
 {% block body %}
 
-    <table border="1">
+    <table class="table table-bordered table-striped table-hover">
+        <thead>
         <tr>
-            <td>
+            <th>
                 Navn
-            </td>
-            <td>
-                Alder
-            </td>
-            <td>
-                Køn
-            </td>
-            <td>
+            </th>
+
+            <th>
                 Instruktion
-            </td>
-        </tr>
+            </th>
+            </tr>
+        </thead>
     {% for p in profiles %}
         <tr>
             <td>
                 {{ p.name }}
             </td>
-            <td>
-                {{ p.birth|timesince }}
-            </td>
-            <td>
-                {{ p|gender }}
-            </td>
+           
             <td>
                 {% if p.location %}
                     Gå til {{ p.location.name }}
@@ -37,7 +29,7 @@
             </td>
         </tr>
     {% endfor %}
-    <table>
+    </table>
 
 
 {% endblock %}

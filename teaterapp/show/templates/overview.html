@@ -126,12 +126,14 @@
     {% endfor %}
 
 
-    <!-- <a href="/reset/"> Reset </a> -->
-        
-
-    
 {% endblock %}
 
+{% block adminarea %}
+
+{% if user.is_superuser %}
+<a href="/admin/" class="btn btn-danger btn-sml"> Admin Area </a> (do not use while live)  
+{% endif %}
+{% endblock %}
 
 {% block javascript %}
     //Check version periodically
