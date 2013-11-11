@@ -205,6 +205,11 @@ def quiz(request):
                         except:
                             r = Rating(profile=profile, scale=a.scale)
                         r.value += a.modifier
+                        if r.value > 9:
+                            r.value = 9
+                        if r.value < 0:
+                            r.value = 0
+
                         r.save()
 
                     profile.force_questions -= 1
