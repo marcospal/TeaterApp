@@ -13,13 +13,13 @@ class Scale(models.Model):
 class Question(models.Model):
     id = models.AutoField(primary_key=True)
     date = models.DateTimeField(auto_now_add=True)
-    text = models.CharField(max_length=256)
+    text = models.TextField(help_text='The question to ask. fx "Have you been to Africa?')
     
     #use the priority to sort order of questions
-    priority = models.IntegerField(default=1)
+    priority = models.IntegerField(default=1,help_text='The lower priority, the earlier the question will be asked')
     
     #if a leading answer exist this question cant start
-    leading_answer = models.OneToOneField('Answer', related_name='next_question', unique=True, blank=True, null=True)
+    leading_answer = models.OneToOneField('Answer', related_name='next_question', help_text='Select ---- to make independent question', unique=True, blank=True, null=True)
     
     
     def __unicode__(self):
@@ -31,7 +31,7 @@ class Question(models.Model):
 
 
     def getPriority(self):
-        if self.leading_answer:
+        if self.leading_answer: #recursive get score of parent question
             return self.leading_answer.question.getPriority()
         else:
             return self.priority
