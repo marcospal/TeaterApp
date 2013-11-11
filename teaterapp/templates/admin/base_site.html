@@ -4,7 +4,14 @@
 {% block title %}{{ title }} | {% trans 'Django site admin' %}{% endblock %}
 
 {% block branding %}
-<h1 id="site-name">Ord Mellem Rum - Administration  | <a href="/overview/"> Show overview </a></h1>
+<h1 id="site-name">Ord Mellem Rum - Administration  </h1>
+
+{% if user.is_staff %}
+<ul style="margin-left:20px;">
+<li><h3><a href="/overview/" style="text-decoration:underline;">  Overview </a></h3>(for running locations when live)</li>
+<li><h3><a href="/reset/" style="color:red; background-color:black; padding:5px; text-decoration:underline;"> Reset show </a></h3>(you will be asked to confirm)</li>
+</ul>
+{% endif %}
 
 {% endblock %}
 

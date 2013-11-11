@@ -57,7 +57,7 @@
                             <option value="{{ l.id }}">{{ l.name }}</option>
                         {% endfor %}
                         </select>
-                        <input type="submit" value="Send!">
+                        <input type="submit" class="btn btn-warning" value="Send!">
 
                         
                     </form>
@@ -133,7 +133,8 @@
 {% block adminarea %}
 
 {% if user.is_superuser %}
-<a href="/admin/" class="btn btn-danger btn-sml"> Admin Area </a> (do not use while live)  
+
+<a href="/admin/" class="glyphicon glyphicon-warning-sign btn btn-danger btn-sml"> Admin Area </a> <br/><small>(do not use while live) </small>
 {% endif %}
 {% endblock %}
 
