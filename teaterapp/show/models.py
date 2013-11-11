@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Count
 import datetime
-from colorfield.fields import ColorField
 
 
 class Scale(models.Model):
@@ -13,7 +12,7 @@ class Scale(models.Model):
 
 class Color(models.Model):
     title = models.CharField(u'Title', max_length=250)
-    color = ColorField(default='ffffff')
+    color = CharField(default='ffffff')
     def __unicode__(self):
         return "%s" % (self.title)
 
