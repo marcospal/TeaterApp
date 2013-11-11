@@ -2,38 +2,41 @@
 {% load show_extras %}
 {% block body %}
     
-    {{ location.name }}<br>
+    <h2>{{ location.name }}</h2>
 
-    {{ location.profiles.count }} /  {{ location.capacity }}<br>
+    <h4>Kapacitet: {{ location.profiles.count }} /  {{ location.capacity }}</h4>
 
-    {{ location|statestr }}
+    <h4>Status: {{ location|statestr }}</h4>
+
+    <h3>Deltagere i rummet:</h4>
 
 
-
-     <table border="1">
+    <table class="table table-bordered table-striped table-hover">
+            <thead>
             <tr>
-                <td>
+                <th>
                     Navn
-                </td>
-                <td>
+                </th>
+                <th>
                     Køn
-                </td>
-                <td>
+                </th>
+                <th>
                     Alder
-                </td>
-                <td>
+                </th>
+                <th>
                     Kode
-                </td>
-                <td>
+                </th>
+                <th>
                     Noter/Låst
-                </td>
+                </th>
                 {% if location.scale %} 
-                    <td>
-                        Karater: {{ location.scale }}
-                    </td>
+                    <th>
+                        Skala: {{ location.scale }}
+                    </th>
                 {% endif%}
 
             </tr>
+            </thead>
             {% for p in location.profiles.all %}
                 {% if p.active %}
                     <tr>
@@ -62,8 +65,12 @@
                                 <input type="hidden" name="profile" value="{{ p.id }}">
                                 
                                 <INPUT type="submit" value="-" name="action"  class="btn btn-primary"> 
+
+                                <input type="hidden" name="location" value="{{ location.id }}">
+
+                                <INPUT type="submit" value="-" name="action"  class="btn btn-danger"> 
                                 {{ p|scaleval:location.scale }}
-                                <INPUT type="submit" value="+" name="action"  class="btn btn-primary"> 
+                                <INPUT type="submit" value="+" name="action"  class="btn btn-success"> 
                             </form>
                         
                         </td>
