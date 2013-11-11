@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Count
@@ -98,9 +99,9 @@ class Location(models.Model):
     #state of location
     CLOSED, OPEN_FOR_VISITORS, IN_SESSION, NUM_PHASES = range(4)
     PHASES = (
-        (CLOSED, 'Lukket'),
-        (OPEN_FOR_VISITORS, 'AAben'),
-        (IN_SESSION, 'igang'),
+        (CLOSED, u'Lukket'),
+        (OPEN_FOR_VISITORS, u'Åben'),
+        (IN_SESSION, u'Igang'),
     )
     def stateStr(self):
         for a,b in self.PHASES:

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from django.conf import settings
 from django.contrib import auth
 from django.shortcuts import render_to_response
@@ -286,6 +288,7 @@ def choose(request):
             #check its open and that it has the capacity
             if location in Location.getAvailableLocations(profile):
                 profile.location = location
+                profile.version += 1
                 profile.location_set_time = datetime.datetime.now()
                 profile.save()
                 location.version += 1
@@ -614,6 +617,7 @@ def reset(request):
         for p in Profile.objects.filter(active=True):
             p.active = False
             p.location = None
+            p.version += 1
             p.save()
         for l in Location.objects.all():
             l.state = Location.CLOSED
