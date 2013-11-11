@@ -64,11 +64,10 @@
                                 {% csrf_token %}
                                 <input type="hidden" name="profile" value="{{ p.id }}">
                                 
-                                <INPUT type="submit" value="-" name="action"  class="btn btn-primary"> 
+                                <INPUT type="submit" value="-" name="action"  class="btn btn btn-danger"> 
 
                                 <input type="hidden" name="location" value="{{ location.id }}">
 
-                                <INPUT type="submit" value="-" name="action"  class="btn btn-danger"> 
                                 {{ p|scaleval:location.scale }}
                                 <INPUT type="submit" value="+" name="action"  class="btn btn-success"> 
                             </form>
