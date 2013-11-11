@@ -75,7 +75,7 @@ class Location(models.Model):
     
     name = models.CharField(max_length=256, help_text='Name of location.')
     
-    directions = models.CharField(max_length=256, help_text='How to get there')
+    directions = models.TextField(max_length=256, help_text='How to get there')
 
     #what is the max capacity of this location
     capacity = models.IntegerField(default=1, help_text='Maximum number of people that it can hold')
@@ -85,14 +85,14 @@ class Location(models.Model):
     
 
     #Is this location only for unlocked profiles
-    safe = models.BooleanField(default=True, help_text='Block locked profiles from entering')
+    safe = models.BooleanField(default=True, help_text='Skal vaere checked medmindre det er et kosteskab/venterum for folk der er laast.')
     
     #state of location
     CLOSED, OPEN_FOR_VISITORS, IN_SESSION, NUM_PHASES = range(4)
     PHASES = (
         (CLOSED, 'Lukket'),
         (OPEN_FOR_VISITORS, 'AAben'),
-        (IN_SESSION, 'Scenen er igang'),
+        (IN_SESSION, 'igang'),
     )
     def stateStr(self):
         for a,b in self.PHASES:

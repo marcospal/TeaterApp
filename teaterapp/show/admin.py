@@ -2,6 +2,14 @@ from models import *
 
 from django.contrib import admin
 
+from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
+from django.contrib.auth.models import Group
+
+admin.site.unregister(User)
+admin.site.unregister(Group)
+admin.site.unregister(Site)
+
 
 class ScaleAdmin(admin.ModelAdmin):
     ordering = ('name',)
@@ -13,10 +21,12 @@ class LocationScaleInLine(admin.TabularInline):
     model = Location.parameters.through
 
 
+
 class LocationAdmin(admin.ModelAdmin):
     ordering = ('name',)
     search_fields = ('name',)
     inlines = [ LocationScaleInLine, ]
+    exclude = ('version','priority')
 admin.site.register(Location, LocationAdmin)
 
 class ProfileScaleInLine(admin.TabularInline):
@@ -28,11 +38,11 @@ class ProfileNoteInLine(admin.TabularInline):
     extra=1
 
 
-class ProfileAdmin(admin.ModelAdmin):
-    ordering = ('active', )
-    search_fields = ('code',)
-    inlines = [ ProfileScaleInLine, ProfileNoteInLine ]
-admin.site.register(Profile, ProfileAdmin)
+#class ProfileAdmin(admin.ModelAdmin):
+#    ordering = ('active', )
+#    search_fields = ('code',)
+#    inlines = [ ProfileScaleInLine, ProfileNoteInLine ]
+#admin.site.register(Profile, ProfileAdmin)
 
 
 #class RatingAdmin(admin.ModelAdmin):
@@ -55,10 +65,10 @@ class QuestionAdmin(admin.ModelAdmin):
 admin.site.register(Question, QuestionAdmin)
 
 
-class NoteAdmin(admin.ModelAdmin):
-    ordering = ('id', )
-    search_fields = ('text',)
-admin.site.register(Note, NoteAdmin)
+#class NoteAdmin(admin.ModelAdmin):
+#    ordering = ('id', )
+#    search_fields = ('text',)
+#admin.site.register(Note, NoteAdmin)
 
 
 #class AnswerAdmin(admin.ModelAdmin):
