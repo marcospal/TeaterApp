@@ -531,18 +531,27 @@ def profile(request, id):
 
 
     #Allow location owner to adjust profile    
-    s = request.POST.get('scale');
-    p = request.POST.get('profile');
-    a = request.POST.get('action');
-    n = request.POST.get('note');
-    
+    s = request.POST.get('scale')
+    p = request.POST.get('profile')
+    a = request.POST.get('action')
+    n = request.POST.get('note')
+
+    if a != None:
+        if a == "toggle_lock":
+            profile.locked = not profile.locked
+            profile.version += 1
+            profile.save()
+
+
     if p != None:
         p = Profile.objects.get(id=int(float(p)))
         
         if n != None:
             n = Note(text=n, profile=p)
             n.save()
-
+        
+            
+        
         if(s != None  and a != None):
             s = Scale.objects.get(id=int(float(s)))
             r = None

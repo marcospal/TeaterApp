@@ -35,37 +35,19 @@
                 Låst:
             </td>
             <td>
-                {% if profile.locked %}
-                    Locked
-                {% else %}
-                    Not locked
-                {% endif %}
-            </td>
-        </tr>
-    </table>
-
-    <h4>Skalaer:</h4>
-    <table class="table table-bordered table-striped table-hover">
-        {% for r in profile.rating_set.all %}
-        <tr>
-            <td>
-                {{ r.scale.name }}
-            </td>
-            <td>
-                <form method="post" id="form" class="form-horizontal" role="form">
+                 <form method="post">
                     {% csrf_token %}
-                    <input type="hidden" name="profile" value="{{ profile.id }}">
-                    <input type="hidden" name="scale" value="{{ r.scale.id }}">
-                    <INPUT type="submit" value="-" name="action"  class="btn btn-primary"> 
-                    {{ r.value }}    
-                    <INPUT type="submit" value="+" name="action"  class="btn btn-primary"> 
+                    {% if profile.locked %}
+                        <h3>Profilen er låst!!! </h3> <button name="action" value="toggle_lock">Frigiv profilen</button>
+                    {% else %}
+                        Profilen er fri. <button name="action" value="toggle_lock">Lås profilen</button>
+                    {% endif %}
                 </form>
-
-                
             </td>
         </tr>
-        {% endfor %}
     </table>
+
+    
 
     <h4>Noter:</h4>
 
@@ -96,10 +78,33 @@
     <form method="post">
          {% csrf_token %}
         <input type="hidden" name="profile" value="{{ profile.id }}" id="name">
-        <input type="textarea" name="note" value="Skriv note her">
+        <input type="textarea" name="note" value="">
         <button>Tilføj note</button>
     </form>
 
+   
+    <h4>Skalaer:</h4>
+    <table class="table table-bordered table-striped table-hover">
+        {% for r in profile.rating_set.all %}
+        <tr>
+            <td>
+                {{ r.scale.name }}
+            </td>
+            <td>
+                <form method="post" id="form" class="form-horizontal" role="form">
+                    {% csrf_token %}
+                    <input type="hidden" name="profile" value="{{ profile.id }}">
+                    <input type="hidden" name="scale" value="{{ r.scale.id }}">
+                    <INPUT type="submit" value="-" name="action"  class="btn btn-primary"> 
+                    {{ r.value }}    
+                    <INPUT type="submit" value="+" name="action"  class="btn btn-primary"> 
+                </form>
+
+                
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
 
 
     <h4>Nuværende rum:</h4>
