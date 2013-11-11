@@ -12,7 +12,7 @@ class Scale(models.Model):
 
 class Color(models.Model):
     title = models.CharField(u'Title', max_length=250)
-    color = CharField(default='ffffff')
+    color = models.CharField(max_length=6,default='ffffff')
     def __unicode__(self):
         return "%s" % (self.title)
 
