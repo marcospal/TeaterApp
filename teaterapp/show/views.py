@@ -228,8 +228,8 @@ def quiz(request):
         def score(a):
             return a.getscore(profile)
         questions = list(questions)
-        questions.sort(key=score)
-        questions.reverse()
+        questions.sort(key=score) #lowest score first
+        
 
         #print them
         for s in questions:

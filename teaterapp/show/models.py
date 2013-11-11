@@ -16,7 +16,7 @@ class Question(models.Model):
     text = models.TextField(help_text='The question to ask. fx "Have you been to Africa?')
     
     #use the priority to sort order of questions
-    priority = models.IntegerField(default=1,help_text='The lower priority, the earlier the question will be asked')
+    priority = models.IntegerField(default=1,help_text='The lower priority, the earlier the question will be asked. 0 first, 1000 last.')
     
     #if a leading answer exist this question cant start
     leading_answer = models.OneToOneField('Answer', related_name='next_question', help_text='Select ---- to make independent question', unique=True, blank=True, null=True)
@@ -41,7 +41,7 @@ class Question(models.Model):
         #lower score if question has been answered
         try:
             qc = QuestionCount.objects.get(profile=profile, question=self)
-            score -= qc.times * 10000   
+            score += qc.times * 10000   
 
         except:
             pass    
