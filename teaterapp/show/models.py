@@ -136,7 +136,7 @@ class Location(models.Model):
         if n > 0:
             score /= n
 
-        print self.name, "___ profile vs room score is: ", score, "___ for ", profile
+        #print self.name, "___ profile vs room score is: ", score, "___ for ", profile
 
         #Add rooms own priority (handicap if you like)
         #print "we are adding a priority bonus of", self.priority
