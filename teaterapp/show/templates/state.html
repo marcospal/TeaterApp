@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load show_extras %}
+{% block body %}
+    
+    <h1>Sæt stadie for forestillingen</h1>
+    <p>Det er meget vigtigt at du kun ændrer stadie når det er nødvendigt </p>
+    <form method="post">
+    {% csrf_token %}
+        <button name="action" value="introOver" class="btn btn-primary">Intro Over</button>
+        </br> </br>
+         <button name="action" value="startEnding" class="btn btn-primary">Start Ending</button>
+          </br> </br>
+         <button name="action" value="undoEnding" class="btn btn-primary">Undo Ending</button>
+         </br>
+    </form>
+
+    
+
+    
+{% endblock %}
+
+
+{% block javascript %}
+    
+{% endblock %}
+
+
+

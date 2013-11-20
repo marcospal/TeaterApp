@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 {% load show_extras %}
 {% block body %}
-    <h4>Frie deltagere:</h4>
+{%if message%}
+<p> {{message}}</p>
+{%endif%}
+    <h4>Status: {{state}} </h4>
+    <h4>Frie deltagere: ({{freeParticipants}} / {{allParticipants}}) </h4>
     <table class="table table-bordered table-striped table-hover">
     <thead>
         <tr>
@@ -13,9 +17,6 @@
             </th>
             <th>
                 Alder
-            </th>
-            <th>
-                Kode
             </th>
             <th>
                 Noter/Låst
@@ -34,11 +35,8 @@
                     {{ f|gender }}
                 </td>
                 <td>
-                    {{f.birth|timesince}}
-                </td>
-                <td>
-                    {{ f.user.username }}
-                </td>
+                    {{f.age}}
+              
                 <td  {% if f.locked %} class="btn-danger" {% endif %}>
                     {% if f.locked %}
                         <span class="glyphicon glyphicon-lock"> Låst</span>
@@ -53,11 +51,11 @@
                         <input type="hidden" name="profile" value="{{ f.id }}" id="name">
                         <select name="location">
                         <option>Vælg en</option>
-                        {% for l in locations %}
+                        {% for l in f.sendToOptions %}
                             <option value="{{ l.id }}">{{ l.name }}</option>
                         {% endfor %}
                         </select>
-                        <input type="submit" class="btn btn-warning" value="Send!">
+                        <input type="submit" class="btn btn-sm btn-warning" value="Send!">
 
                         
                     </form>
@@ -70,12 +68,13 @@
 
     <br>
 
+    
+    <h3>Lokationer: (Åbne: {{openLocations}} / {{totalLocations}}) </h3>(Med intro lokation)
 
-    <h3>Lokationer:</h3>
     {% for l in locations%}
-    <h4><a href="/location/{{l.id}}/">{{ l.name }} - {{ l|statestr}}</a></h4>
+    <h4><a href="/location/{{l.id}}/">{{ l.name }} - {{ l|statestr}}</a> |  <small>({{ l.profiles.count }} /  {{ l.capacity }})</small>  | <small id="timeSinceFirst-{{l.id}}"> 00:00</small> <small>(tid siden første deltage)</small></h4>
 
-
+    {%comment%}
        <table class="table table-bordered table-striped table-hover">
        <thead>
             <tr>
@@ -88,9 +87,7 @@
                 <th>
                     Alder
                 </th>
-                <th>
-                    Kode
-                </th>
+                
                 <th>
                     Noter/Låst
                 </th>
@@ -104,12 +101,9 @@
                         {{ p|gender }}
                     </td>
                     <td>
-                        {{p.birth|timesince}}
+                        {{p.age}}
                     </td>
-                    <td>
-                        {{ p.user.username }}
-                    </td>
-                  
+  
 
                     <td  {% if p.locked %} class="btn-danger" {% endif %}>
                     {% if p.locked %}
@@ -122,8 +116,8 @@
                 </tr>
             {% endfor %}
         </table>
-
-        <br>
+        {%endcomment%}
+     
 
     {% endfor %}
 
@@ -133,12 +127,36 @@
 {% block adminarea %}
 
 {% if user.is_superuser %}
-
+<div class="well">
+<a href="/state/" class="glyphicon glyphicon-warning-sign btn btn-warning btn-sml"> Stadie </a> <br/><small>(use when everybody are ready) </small><br/>
+<a href="/reset/" class="glyphicon glyphicon-warning-sign btn btn-danger btn-sml"> Reset forestilling </a> <br/><small>(do not press while live) </small><br/>
 <a href="/admin/" class="glyphicon glyphicon-warning-sign btn btn-danger btn-sml"> Admin Area </a> <br/><small>(do not use while live) </small>
+</div>
 {% endif %}
 {% endblock %}
 
 {% block javascript %}
+$( document ).ready(function() {
+    {% for l in locations%}
+     {% if l.state == 2 or l.state == 3 or l.state == 4 %}
+          setInterval(
+                function()
+                {
+                    var d = new Date('{{l.first_arrived_time}}');
+                    var now = new Date();
+                    var current = new Date(now-d);
+                    var format = current.getMinutes()+':'+current.getSeconds(); 
+                    if(current.getMinutes()>4)
+                    {
+                        format += ' (lukket for nye)';
+                    }
+                    $("#timeSinceFirst-{{l.id}}" ).text(format);
+                   
+                },300);
+        {%endif%}
+    {%endfor%}
+});
+
     //Check version periodically
     var intervalID = setInterval(
         function()
@@ -152,6 +170,7 @@
         }, {{ AJAX_REFRESH_INTERVAL }});
 
 {% endblock %}
+
 
 
 

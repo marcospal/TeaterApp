@@ -4,12 +4,22 @@
 {% block body %}
 <h2>Login</h2>
 <br/>
+<p class="text-danger">
+{{error}}
+</p>
+<p class="text-muted">
+
+Velkommen til Ord Mellem Rum, <br/>
+Du har fået tildelt en skilt, med en forfatters navn (som er nu dit navn i forestillingen) på forsiden, og en kode på bagsiden.
+Navnet og koden beskytter din anonymitet, når du besvarer personlige spørgsmål her ved computeren, eller i løbet af forestillingen.
+ <br>
+Login her med dit navn og kode nu.</p>
     <form method="post">
         {% csrf_token %}
-        Dit login: <input type="text" name="code" id="codeID" maxlength="6" style="text-transform:uppercase;"/><br>
+        Dit login: <input type="text" name="code" id="codeID" maxlength="4" style="text-transform:uppercase;"/><br>
 
     <br/>
-<p class="text-muted">Dit login er de 6 første tal/bogstaver på din billet. </p>
+
 
         <INPUT class= "btn btn-primary btn-lg " " type="submit" value="Start" name="start"/> 
 
@@ -21,10 +31,7 @@
 
 {% block javascript %}
 
-//Force uppercase and only A-Z & 0-9
-$("#codeID").keyup(function(){
-    this.value = this.value.toUpperCase().replace(/\W/g, '');
-});
+
 $(function() {
   $("#codeID").focus();
 });

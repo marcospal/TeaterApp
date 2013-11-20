@@ -46,11 +46,11 @@ class ProfileNoteInLine(admin.TabularInline):
     extra=1
 
 
-#class ProfileAdmin(admin.ModelAdmin):
-#    ordering = ('active', )
-#    search_fields = ('code',)
-#    inlines = [ ProfileScaleInLine, ProfileNoteInLine ]
-#admin.site.register(Profile, ProfileAdmin)
+class ProfileAdmin(admin.ModelAdmin):
+    ordering = ('active', )
+    search_fields = ('code',)
+    inlines = [ ProfileScaleInLine, ProfileNoteInLine ]
+admin.site.register(Profile, ProfileAdmin)
 
 
 #class RatingAdmin(admin.ModelAdmin):

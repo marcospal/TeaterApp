@@ -43,6 +43,9 @@ urlpatterns = patterns('',
 
     #Reset
     url(r'^reset/$', 'teaterapp.show.views.reset', name='reset'),
+
+    #State
+    url(r'^state/$', 'teaterapp.show.views.state', name='state'),
     
     #color thingie
     url(r'^color/$', 'teaterapp.show.views.color', name='color'),

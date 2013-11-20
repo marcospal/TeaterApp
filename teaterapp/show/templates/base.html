@@ -56,7 +56,7 @@
       <hr>
 
       <footer>
-        <p>&copy; Kanako Aps 2013   </p>
+        <p>Cantabile 2 og Vordingborg Bibliotek  </p>
         <p>{% block adminarea %} {% endblock %}</p>
       </footer>
     </div> <!-- /container -->        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
@@ -70,6 +70,7 @@
 
         {% endblock %}
 
+      {% block colorJS %}
         $(function() {
 
 
@@ -86,6 +87,7 @@
             setBG();
 
         });
+        {% endblock %}
         </script>
         <script>
             var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']];

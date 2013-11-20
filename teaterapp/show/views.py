@@ -16,20 +16,32 @@ import datetime
 from django.utils.timezone import utc
 from django.utils import simplejson
 
-from models import Profile, Question, Rating, QuestionCount, Location, VisitCount, Scale, Color, Note
+from models import Profile, Question, Rating, QuestionCount, Location, Scale, Color, Note
 
 
+def validate(code):
+    if len(code) != 4:
+        return -1
+    try:
+        a = int(float(code[:2]))
+        b = int(float(code[2:]))
+        if (a+66)%100 == b:
+            return a
+        else:
+            return -1
+    except:
+        return -1
 #This is the main entrypoint of the application
 def login(request):
-    
+    error = ""
     #if a code is submitted, use it to login
     if request.POST.__contains__('code'):
         #Force uppercase
         code = request.POST["code"].upper()
         #force alphanumeric
         code = re.sub('\W', '', code)
-        if len(code) == 6:
-            print "code ok"
+        
+        if validate(code)>=0:
             #code is ok
             user = None
             try:
@@ -41,23 +53,28 @@ def login(request):
                 user.save()
             user = auth.authenticate(username=code, password=code)
             auth.login(request, user)
+        else:
+            error = "Koden er ikke korrekt! Prøv igen."
             
     if request.user.is_authenticated():
         if request.user.is_staff:
-            return HttpResponseRedirect('/overview/');
+            return HttpResponseRedirect('/overview/')
  
         #find profile for user
         profile = None
         try:
             profile = Profile.objects.get(user=request.user, active=True)
         except:
-            return HttpResponseRedirect('/baseinfo/');
+            return HttpResponseRedirect('/baseinfo/')
         
         #User has profile decide what to do
 
+        #As long as actor is evaluating the profile we force him to take quizzes
+        if profile.location and profile.location.state == Location.EVALUATING:
+            return HttpResponseRedirect('/quiz/')
         #user is assigned a location
         if profile.location:
-            return HttpResponseRedirect('/directions/');
+            return HttpResponseRedirect('/directions/')
         
         #question is waiting
         if profile.question or profile.force_questions > 0:
@@ -66,18 +83,19 @@ def login(request):
         #what locations are possible?
         locations = Location.getAvailableLocations(profile)
         if len(locations) == 0:
-            return HttpResponseRedirect('/quiz/');
+            return HttpResponseRedirect('/quiz/')
         else:
             #if len(locations) == 1:
             #    #there is no choice, just send the guy
             #    profile.location = locations[0]
             #else:
             #    #you have a choice
-            return HttpResponseRedirect('/choose/');
+            return HttpResponseRedirect('/choose/')
         
     c = {
         'STATIC_URL': settings.STATIC_URL,
         'title': "Login",
+        'error': error,
         'test': request.user,
            
     }
@@ -102,17 +120,15 @@ def baseinfo(request):
     except:
         pass
 
-        print request.POST
+    
 
-    _code = request.POST.get('code');
-    _name = request.POST.get('name');
-    _sex = request.POST.get('sex');
-    _day = request.POST.get('day') ;
-    _month = request.POST.get('month') ;
-    _year = request.POST.get('year') ;
-
-    if _code != None and _name != None and _sex != None and _day != None and _month != None and _year != None:
-        #print _code, _name, _sex, _day, _month, _year
+    _code = request.POST.get('code')
+    _sex = request.POST.get('sex')
+    _age = request.POST.get('age') 
+    _name = "Anders Andersen"
+    print _code, _sex, _age
+    if _code != None and _sex != None and _age != None:
+        print _code, _sex, _age
 
         for a,b in Profile.GENDERS:
             if b == _sex:
@@ -120,23 +136,19 @@ def baseinfo(request):
         
         #print _sex
 
-        _year = int(float(_year))
-        _month = int(float(_month))
-        _day = int(float(_day))
-
-        #print _year, _month, _day
-
-        d = datetime.date(_year,_month, _day)
+        _locations = Location.objects.all()
         #print d
-        profile = Profile(user=request.user, name=_name, birth=d, gender=_sex, force_questions=settings.USER_FORCED_QUESTIONS)
+        profile = Profile(user=request.user, name=_name, age=_age, gender=_sex, force_questions=settings.USER_FORCED_QUESTIONS)
+        
         profile.save()
-
+        profile.available_locations = _locations
+        profile.save()
         #print "creating default ratings"
         for s in Scale.objects.all():
             #print s
             r = Rating(profile=profile, scale=s)
             r.save()
-
+        profile.save()
         return HttpResponseRedirect('/')
 
 
@@ -146,6 +158,7 @@ def baseinfo(request):
         'STATIC_URL': settings.STATIC_URL,
         'title': "baseinfo",
         'code': request.user.username,
+        'name': _name,
         'USER_TIMEOUT_SECONDS' : settings.USER_TIMEOUT_SECONDS
     }
     return render_to_response('baseinfo.html', c, context_instance=RequestContext(request))
@@ -200,6 +213,9 @@ def quiz(request):
                     qc.times += 1
                     qc.save()
 
+                    if a.ignoreLocations != None:
+                        for loc in a.ignoreLocations.all():
+                            profile.available_locations.remove(loc)
                     if a.scale != None:
                         r = None
                         try:
@@ -207,11 +223,7 @@ def quiz(request):
                         except:
                             r = Rating(profile=profile, scale=a.scale)
                         r.value += a.modifier
-                        if r.value > 9:
-                            r.value = 9
-                        if r.value < 0:
-                            r.value = 0
-
+                        
                         r.save()
 
                     profile.force_questions -= 1
@@ -230,7 +242,7 @@ def quiz(request):
         if (profile.force_questions <= 0 and len(Location.getAvailableLocations(profile)) > 0) or profile.location != None:
             profile.question = None
             profile.save()
-            return HttpResponseRedirect('/');
+            return HttpResponseRedirect('/')
 
 
         #find all possible questions
@@ -331,12 +343,14 @@ def directions(request):
 
     if done != None:
         
-        qc = None
-        try:
-            qc = VisitCount.objects.get(profile=profile, location=profile.location)
-        except:
-            qc = VisitCount(profile=profile, location=profile.location)
-        qc.times += 1
+        #qc = None
+        #try:
+        #    qc = VisitCount.objects.get(profile=profile, location=profile.location)
+        #except:
+        #    qc = VisitCount(profile=profile, location=profile.location)
+        #qc.times += 1
+        profile.available_locations.remove(profile.location)
+
         qc.save()
 
         profile.version += 1
@@ -401,6 +415,8 @@ def overview(request):
 
     profile = request.POST.get("profile")
     location = request.POST.get("location")
+
+    
     if profile != None and location != None:
         try:
             profile = Profile.objects.get(id=profile)
@@ -414,16 +430,39 @@ def overview(request):
         except:
             pass
 
+    profiles = Profile.objects.filter(active=True, location__isnull=True)
+    
+
+    allProfiles = Profile.objects.filter(active=True)
+
+    state = "Intro"
+    if(len(allProfiles)>0):
+        state = allProfiles[0].state
+    if state == Profile.INTRO:
+        state = "Intro"
+    if state == Profile.ENDING:
+        state = "Slutfase"
+    if state == Profile.RUNNING:
+        state = "I gang"
 
 
+
+    closedLocations = Location.objects.filter(state=Location.CLOSED)
+    for freeP in profiles:
+        freeP.sendToOptions = Location.getAvailableLocations(freeP)
     c = {
         'profile' : profile,
         'STATIC_URL': settings.STATIC_URL,
         'title': "overview",
         'locations': locations,
-        'free_profiles' : Profile.objects.filter(active=True, location__isnull=True),
+        'free_profiles' : profiles,
         'version': getOverviewVersion(),
         'AJAX_REFRESH_INTERVAL' : settings.AJAX_REFRESH_INTERVAL,
+        'openLocations' : len(list(locations))-len(list(closedLocations)),
+        'totalLocations' : len(list(locations)) ,
+        'freeParticipants': len(profiles),
+        'allParticipants': len(allProfiles),
+        'state': state,
     }
     return render_to_response('overview.html', c, context_instance=RequestContext(request))
 
@@ -449,8 +488,8 @@ def location(request, id):
     print request.POST
 
     #Allow location owner to adjust profile    
-    p = request.POST.get('profile');
-    a = request.POST.get('action');
+    p = request.POST.get('profile')
+    a = request.POST.get('action')
     if(a != None):
         
         if p != None:
@@ -461,13 +500,13 @@ def location(request, id):
             except Rating.DoesNotExist:
                 r = Rating(profile=p, location=location.scale)
             if a == '+':
-                r.value = min(9, r.value + 1)
+                r.value = r.value + 1
                 r.save()
                 print "add"
                 location.version += 1
                 location.save()
             if a == '-':
-                r.value = max(1, r.value - 1)
+                r.value = r.value - 1
                 r.save()
                 print "sub"
                 location.version += 1
@@ -476,17 +515,18 @@ def location(request, id):
         if a == 'close':
             for p in location.profiles.all():
                 p.location = None
-                p.force_questions = 5
+                p.force_questions = 2 #NULLO: Hvor mange spørgsmål efter at blive sendt ud
                 p.version += 1
 
                 #record where people have been
-                try:
-                    v = VisitCount.objects.get(profile=p, location=location)
-                    v.times += 1
-                    v.save()
-                except:
-                    v = VisitCount(profile=p, location=location)
-                    v.save()
+                #try:
+                #    v = VisitCount.objects.get(profile=p, location=location)
+                #    v.times += 1
+                #    v.save()
+                #except:
+                #    v = VisitCount(profile=p, location=location)
+                #    v.save()
+                p.available_locations.remove(location)
 
                 p.save()
             location.state = Location.CLOSED
@@ -497,7 +537,17 @@ def location(request, id):
             location.version += 1
             location.save()
         if a == 'start':
+            location.first_arrived_time = datetime.datetime.now()
             location.state = Location.IN_SESSION
+            location.version += 1
+            location.save()
+        if a == 'firstParticipant':
+            location.first_arrived_time = datetime.datetime.now()
+            location.state = Location.FIRST_ARRIVED
+            location.version += 1
+            location.save()
+        if a == 'evaluate':
+            location.state = Location.EVALUATING
             location.version += 1
             location.save()
 
@@ -544,15 +594,24 @@ def profile(request, id):
     a = request.POST.get('action')
     n = request.POST.get('note')
 
+    ignoreLocation = request.POST.get('ignoreLocation')
+
+    if ignoreLocation != None:
+            l = Location.objects.get(id=int(ignoreLocation)) 
+            if l != None:
+                profile.available_locations.remove(l)
+                profile.save()
+
     if a != None:
         if a == "toggle_lock":
             profile.locked = not profile.locked
             profile.version += 1
             profile.save()
 
-
-    if p != None:
-        p = Profile.objects.get(id=int(float(p)))
+    
+    if p != None and p.isdigit():
+       
+        p = Profile.objects.get(id=int(p)) 
         
         if n != None:
             n = Note(text=n, profile=p)
@@ -569,26 +628,26 @@ def profile(request, id):
                 r = Rating(profile=p, location=s)
 
             if a == '+':
-                r.value = min(9, r.value + 1)
+                r.value = r.value +1
                 r.save()
                 print "add"
                 profile.version+=1
                 profile.save()
             if a == '-':
-                r.value = max(1, r.value - 1)
+                r.value = r.value - 1
                 r.save()
                 print "sub"
                 profile.version+=1
                 profile.save()
 
-    prev = profile.locations.all()
+    #prev = profile.locations.all()
 
     c = {
         'STATIC_URL': settings.STATIC_URL,
         'title' : "profile",
         'profile' : profile,
+        'locations': profile.available_locations.all(),
         'next' : Location.getAvailableLocations(profile),
-        'prev' : prev,
         'AJAX_REFRESH_INTERVAL' : settings.AJAX_REFRESH_INTERVAL,  
     }
     return render_to_response('profile.html', c, context_instance=RequestContext(request))
@@ -614,7 +673,7 @@ def reset(request):
     print request.POST
     a = request.POST.get('action')
     if a == 'reset':
-        for p in Profile.objects.filter(active=True):
+        for p in Profile.objects.all():
             p.active = False
             p.location = None
             p.version += 1
@@ -624,6 +683,64 @@ def reset(request):
             l.save()
         return HttpResponseRedirect('/')
     return render_to_response('reset.html', {}, context_instance=RequestContext(request))
+
+@staff_member_required
+def state(request):
+    state = request.POST.get('state')
+    message = ""
+    a = request.POST.get('action')
+    if a == 'introOver':
+        message = "Intro er started"
+        profs = list(Profile.objects.filter(active=True).all())
+        
+        def score(p):
+            return len(p.available_locations.all())
+        profs.sort(key=score) #lowest score first
+
+        for p in profs:
+            p.state = Profile.RUNNING
+            #Todo: Randomize, then fill one location at a time, 
+            #Will fail if no locataions. sort by rating with lowest first. english should give -100
+            locs = Location.getAvailableLocations(p)
+            if len(locs)>0:
+                p.location = Location.getAvailableLocations(p)[0]
+            p.version += 1
+            p.save()
+        
+        for l in Location.objects.all():
+            if l.isEnding:
+                l.state = Location.CLOSED
+                l.save()
+
+        return HttpResponseRedirect('/overview')
+
+    if a == 'startEnding':
+        message = "Ending is started"
+        for p in Profile.objects.all():
+            p.state = Profile.ENDING
+            p.save()
+        
+        for l in Location.objects.all():
+            if l.isEnding:
+                l.state = Location.OPEN_FOR_VISITORS
+                l.save()
+
+
+        return HttpResponseRedirect('/overview')
+
+    if a == 'undoEnding':
+        message = "Back to normal"
+        for p in Profile.objects.all():
+            p.state = Profile.RUNNING
+            p.save()
+        
+        for l in Location.objects.all():
+            if l.isEnding:
+                l.state = Location.CLOSED
+                l.save()
+        return HttpResponseRedirect('/overview')
+
+    return render_to_response('state.html', {}, context_instance=RequestContext(request))
 
 
 

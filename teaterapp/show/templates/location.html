@@ -8,6 +8,86 @@
 
     <h4>Status: {{ location|statestr }}</h4>
 
+    {% if location.state == 1 %}
+        <p>
+            <form method="post" id="form" class="form-horizontal" role="form">
+                {% csrf_token %}
+                <input type="hidden" name="location" value="{{ location.id }}">
+                <button name="action" value="firstParticipant" class="btn btn-primary btn-sm">Første deltager ankommer</button>
+                 <p>(Starter timer. Efter 4 min. bliver der ikke sendt flere)</p>
+            </form>
+        </p>
+
+    {% endif %}
+
+    {% if location.state == 2 %}
+            <form method="post" id="form" class="form-horizontal" role="form">
+                {% csrf_token %}
+                <input type="hidden" name="location" value="{{ location.id }}">
+                <button name="action" value="start" class="btn btn-primary">Begynd scene</button>
+                 <p>(Efter 4 min. bliver der ikke sendt flere, men du kan starte når du vil)</p>
+            </form>
+            Tid siden første deltager ankom:
+            <strong><p id="timeSinceFirstParticipant">
+            00:00
+            </p> </strong>
+    {% endif %}
+
+    {% if location.state == 3 %}
+            <form method="post" id="form" class="form-horizontal" role="form">
+                {% csrf_token %}
+                <input type="hidden" name="location" value="{{ location.id }}">
+                <button name="action" value="evaluate" class="btn btn-primary">Send deltagerne væk og evaluer</button>
+                 <p>(Tryk her inden deltagerne når hen til en computer. f.eks. når de bliver bedt om at gå)</p>
+                Tid siden scenen startede:
+                <strong><p id="timeSinceFirstParticipant" >
+                00:00
+
+                </p> </strong>
+            </form>
+
+        {% endif %}
+
+         {% if location.state == 4 %}
+           <form method="post" id="form" class="form-horizontal" role="form">
+                {% csrf_token %}
+                <input type="hidden" name="location" value="{{ location.id }}">
+                <button name="action" value="close" class="btn btn-primary">Send evaluering</button> 
+                <p>(De seneste deltagere kan ikke blive sendt til en ny lokation før du trykker send. Får spørgsmål til du er færdig.)</p>
+            </form>
+
+        {% endif %}
+
+
+        {% if location.state == 0 %}
+        <p>
+           <form method="post" id="form" class="form-horizontal" role="form">
+                {% csrf_token %}
+                <input type="hidden" name="location" value="{{ location.id }}">
+                <button name="action" value="open" class="btn btn-primary">Åben lokation</button>
+                 <p>(Ingen deltagere bliver sendt denne vej før der er åbent)</p>
+            </form>
+            </p>
+        {% endif %}
+
+         {% if location.state != 0 %}
+         <p>
+           <form method="post" id="form" class="form-horizontal" role="form">
+                {% csrf_token %}
+                <input type="hidden" name="location" value="{{ location.id }}">
+                <button name="action" value="close" class="btn btn-primary">Luk lokation</button>
+                 <p>(Luk den, hvis lokationen ikke skal bruges mere)</p>
+            </form>
+        </p>
+        {% endif %}
+        
+
+        
+        
+        
+
+
+
     <h3>Deltagere i rummet:</h4>
 
 
@@ -23,17 +103,16 @@
                 <th>
                     Alder
                 </th>
-                <th>
-                    Kode
-                </th>
+                
                 <th>
                     Noter/Låst
                 </th>
-                {% if location.scale %} 
+                {% if location.state == 4 %}
                     <th>
-                        Skala: {{ location.scale }}
+                        Skala:
                     </th>
-                {% endif%}
+                {%endif%}
+             
 
             </tr>
             </thead>
@@ -46,11 +125,9 @@
                             {{ p|gender }}
                         </td>
                         <td>
-                            {{p.birth|timesince}}
+                            {{p.age}}
                         </td>
-                        <td>
-                            {{ p.user.username }}
-                        </td>
+                       
                         <td>
                             {% if p.locked %}
                                 Låst
@@ -58,8 +135,32 @@
 
                             {% endif %}
                         </td>
-                        {% if location.scale %} 
+                        {% if location.state == 4 %}
                         <td>
+
+
+                        <table class="table">
+                                {% for r in p.rating_set.all %}
+                                <tr>
+                                    <td>
+                                        {{ r.scale.name }}:
+                                    </td>
+                                    <td>
+                                        <form method="post" id="form" class="form-horizontal" role="form">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="scale" value="{{ r.scale.id }}">
+                                            <INPUT type="submit" value="-" name="action"  class="btn btn-sm btn-warning"> 
+                                            {%comment%}{{ r.value }} {%endcomment%}   
+                                            <INPUT type="submit" value="+" name="action"  class="btn btn-sm btn-success"> 
+                                        </form>
+
+                                        
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </table>
+
+                        {%comment%}
                             <form method="post" id="form" class="form-horizontal" role="form">
                                 {% csrf_token %}
                                 <input type="hidden" name="profile" value="{{ p.id }}">
@@ -71,7 +172,7 @@
                                 {{ p|scaleval:location.scale }}
                                 <INPUT type="submit" value="+" name="action"  class="btn btn-success"> 
                             </form>
-                        
+                        {%endcomment%}
                         </td>
                     {% endif%}
                     </tr>
@@ -79,32 +180,6 @@
             {% endfor %}
         </table>
 
-        {% if location.state == 0 %}
-           <form method="post" id="form" class="form-horizontal" role="form">
-                {% csrf_token %}
-                <input type="hidden" name="location" value="{{ location.id }}">
-                <button name="action" value="open" class="btn btn-primary">Åben lokation</button>
-            </form>
-
-        {% endif %}
-        
-        {% if location.state == 1 %}
-            <form method="post" id="form" class="form-horizontal" role="form">
-                {% csrf_token %}
-                <input type="hidden" name="location" value="{{ location.id }}">
-                <button name="action" value="start" class="btn btn-primary">Begynd scene</button>
-            </form>
-
-        {% endif %}
-        
-        {% if location.state == 2 %}
-            <form method="post" id="form" class="form-horizontal" role="form">
-                {% csrf_token %}
-                <input type="hidden" name="location" value="{{ location.id }}">
-                <button name="action" value="close" class="btn btn-primary">Afslut scene</button>
-            </form>
-
-        {% endif %}
         
 
 
@@ -114,6 +189,20 @@
 
 
 {% block javascript %}
+   
+     $( document ).ready(function() {
+
+        setInterval(
+        function()
+        {
+            var d = new Date('{{location.first_arrived_time}}');
+            var now = new Date();
+            var current = new Date(now-d);
+            var format = current.getMinutes()+':'+current.getSeconds(); 
+            $("#timeSinceFirstParticipant" ).text(format);
+        },300);
+        
+      });
     //Check version periodically
     var intervalID = setInterval(
         function()

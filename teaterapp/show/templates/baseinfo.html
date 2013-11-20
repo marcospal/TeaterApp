@@ -8,6 +8,7 @@
         {% csrf_token %}
 
         
+    <input type="hidden" name="code" value="{{code}}"/>
         <div class="form-group">
     <label class="col-sm-3 control-label">Kode:</label>
     <div class="col-sm-2">
@@ -16,33 +17,19 @@
   </div>
 
 
-        <input type="hidden" name="code" value="{{ code }}" id="name">
+  <input type="hidden" name="name" value="{{name}}"/>
+  <div class="form-group">
+    <label class="col-sm-3 control-label">Navn:</label>
+    <div class="col-sm-2">
+      <p class="form-control-static">{{name}}</p>
+    </div>
+  </div>
+
+
         <div class="form-group">
-             <label for="name" class="col-sm-3 control-label">Navn:</label>
+             <label for="age" class="col-sm-3 control-label">Alder:</label>
              <div class="col-sm-5">
-                <input type="text" name="name" id="nameID" class="form-control" onkeyup="update();">
-            </div>
-        </div>
-
-        <div class="form-group">
-             <label for="birthday" class="col-sm-3 control-label">Fødselsdag:</label>
-             <div class="col-sm-3">
-                
-                <select  name="day" id="dayID" class="form-control" onchange="update();">
-                    <option value="pick">Dag</option>
-                </select>
-            </div>
-
-            <div class="col-sm-3">
-                <select name="month" id="monthID" class="form-control" onchange="update();">
-                    <option value="pick">Måned</option>
-                </select>
-            </div>
-
-            <div class="col-sm-3">
-                <select name="year" id="yearID" class="form-control" onchange="update();">
-                    <option value="pick">År</option>
-                </select>
+                <input type="number" name="age" id="nameID" class="form-control" onkeyup="update();" min="16" max="120" value="30">
 
             </div>
         </div>

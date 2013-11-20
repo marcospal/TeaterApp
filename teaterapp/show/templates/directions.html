@@ -9,7 +9,7 @@
    
 <br/>
 
-    
+    {%if profile.state == 1 %}
     {% if age > USER_SELF_CONTINUE %}
     <p>
     Hvs du har besøgt lokationen og er færdig tryk videre.<br>
@@ -28,6 +28,7 @@
 
     </form>
     {% endif %}
+     {% endif %}
 
 <br/>
 

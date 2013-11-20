@@ -12,6 +12,7 @@
             </td>
             <td>
                 {{ profile.name }}
+                ({{profile.user.username}})
             </td>
         </tr>
         <tr>
@@ -19,7 +20,7 @@
                 Alder:
             </td>
             <td>
-                {{ profile.birth|timesince }}
+                {{ profile.age }}
             </td>
         </tr>
         <tr>
@@ -115,7 +116,7 @@
         {% endfor %}
     </table>
 
-
+    {%comment%}
     <h4>Nuværende rum:</h4>
     {% if profile.location %}
         {{ profile.location.name }}
@@ -123,6 +124,7 @@
         Ingen
     {% endif %}
     <br>
+    {%endcomment%}
 
 
     <h4>Næste mulige rum:</h4>
@@ -131,9 +133,7 @@
             <td>
                 Lokation
             </td>
-            <td>
-                Score
-            </td>
+            
         </tr>
 
         {% for l in next %}
@@ -141,14 +141,34 @@
             <td>
                 <a href="/location/{{ l.id }}/">{{ l.name }}</a>
             </td>
-            <td>
-                {{ l|getscore:profile }}
-            </td>
+           
         </tr>
         {% endfor %}
     </table>
     
-    <h4>Tidligere besøgte rum:</h4>
+
+    <h4>Fjern rum så deltager aldrig ender der:</h4>
+    <form method="post" id="form" class="form-horizontal" role="form">
+                        
+                        {% csrf_token %}
+                        
+                        <input type="hidden" name="profile" value="{{ f.id }}" id="name">
+                        <div class="form-group col-xs-10">
+                        <select name="ignoreLocation" class="form-control col-xs-2" >
+                        <option>Vælg en</option>
+                        {% for l in locations %}
+                            <option value="{{ l.id }}">{{ l.name }}</option>
+                        {% endfor %}
+                        </select>
+                        </div>
+                         <div class="form-group col-xs-2">
+                        <input type="submit" class="btn btn-warning" value="Send!">
+                        </div>
+
+                        
+                    </form>
+
+    {%comment%}<h4>Tidligere besøgte rum:</h4>
     <table class="table table-bordered table-striped table-hover">
         <tr>
             <td>
@@ -163,7 +183,7 @@
             </td>
         </tr>
         {% endfor %}
-    </table>
+    </table>{%endcomment%}
     
 
 
