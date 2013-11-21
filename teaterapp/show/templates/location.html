@@ -10,12 +10,15 @@
 
     {% if location.state == 1 %}
         <p>
+        Venter på deltagere.
+        {% if location.profiles.count > 0 %}
             <form method="post" id="form" class="form-horizontal" role="form">
                 {% csrf_token %}
                 <input type="hidden" name="location" value="{{ location.id }}">
                 <button name="action" value="firstParticipant" class="btn btn-primary btn-sm">Første deltager ankommer</button>
                  <p>(Starter timer. Efter 4 min. bliver der ikke sendt flere)</p>
             </form>
+            {%endif%}
         </p>
 
     {% endif %}
@@ -138,8 +141,8 @@
                         {% if location.state == 4 %}
                         <td>
 
-
-                        <table class="table">
+                        <button value="Vis" onclick="alert('Vis ratings');" />
+                        <table class="table" style="display:hidden;">
                                 {% for r in p.rating_set.all %}
                                 <tr>
                                     <td>

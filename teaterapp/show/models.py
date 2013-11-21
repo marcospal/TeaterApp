@@ -142,6 +142,12 @@ class Location(models.Model):
         #print "we are adding a priority bonus of", self.priority
         score += self.priority
         
+        #if over minimum down prioritize room
+        #TODO: probably syntax list len error
+        if len(list(self.aciveProfiles))>=self.capacity_min:
+            score += settings.LOCATION_OVER_MINUMUM_SCORE
+        elif len(list(self.aciveProfiles))>0:
+            score += settings.LOCATION_OVER_ONE_SCORE
         #lower score if location has been visited before
         #try:
         #    qc = VisitCount.objects.get(profile=profile, location=self)
@@ -179,6 +185,8 @@ class Location(models.Model):
                 if other.id == profile.id:
                     result = order
                 order = order+1
+
+
             if a.isEnding and order == 0:
                 return 0
             elif a.isEnding:

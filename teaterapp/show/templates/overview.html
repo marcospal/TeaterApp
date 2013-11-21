@@ -72,7 +72,7 @@
     <h3>Lokationer: (Åbne: {{openLocations}} / {{totalLocations}}) </h3>(Med intro lokation)
 
     {% for l in locations%}
-    <h4><a href="/location/{{l.id}}/">{{ l.name }} - {{ l|statestr}}</a> |  <small>({{ l.profiles.count }} /  {{ l.capacity }})</small>  | <small id="timeSinceFirst-{{l.id}}"> 00:00</small> <small>(tid siden første deltage)</small></h4>
+    <h4><a href="/location/{{l.id}}/">{{ l.name }} - {{ l|statestr}}</a> |  <small>({{ l.profiles.count }} /  {{ l.capacity }})</small>  | <small id="timeSinceFirst-{{l.id}}"> 00:00</small></h4>
 
     {%comment%}
        <table class="table table-bordered table-striped table-hover">

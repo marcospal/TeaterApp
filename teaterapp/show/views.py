@@ -502,13 +502,11 @@ def location(request, id):
             if a == '+':
                 r.value = r.value + 1
                 r.save()
-                print "add"
                 location.version += 1
                 location.save()
             if a == '-':
                 r.value = r.value - 1
                 r.save()
-                print "sub"
                 location.version += 1
                 location.save()
        
@@ -709,6 +707,9 @@ def state(request):
         
         for l in Location.objects.all():
             if l.isEnding:
+                l.state = Location.CLOSED
+                l.save()
+            if l.isStartRoom:
                 l.state = Location.CLOSED
                 l.save()
 

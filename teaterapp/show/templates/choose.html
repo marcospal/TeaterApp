@@ -2,7 +2,12 @@
 
 {% block body %}
 <p>
-    Hvor vil du hen?
+{% if choice.count == 1 %}
+    Din næste lokation er: (vælg den for at forsætte)
+{%else%}
+    
+    Vælg din næste lokation:
+{%endif}
 </p>
 
 
