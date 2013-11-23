@@ -490,25 +490,44 @@ def location(request, id):
     #Allow location owner to adjust profile    
     p = request.POST.get('profile')
     a = request.POST.get('action')
+    n = request.POST.get('note')
+   
+    if n != None:
+        n = Note(text=n, location=location)
+        n.save()
+        location.version += 1
+        location.save()
+
     if(a != None):
         
-        if p != None:
-            p = Profile.objects.get(id=int(p))
-            r = None
-            try:
-                r = Rating.objects.get(profile=p, scale=location.scale)
-            except Rating.DoesNotExist:
-                r = Rating(profile=p, location=location.scale)
-            if a == '+':
-                r.value = r.value + 1
-                r.save()
-                location.version += 1
-                location.save()
-            if a == '-':
-                r.value = r.value - 1
-                r.save()
-                location.version += 1
-                location.save()
+        if a == 'evaluate':
+            location.state = Location.CLOSED
+            location.version += 1
+            location.save()
+
+
+            for p in location.profiles.all():
+                p.location = None
+                p.force_questions = 2 #NULLO: Hvor mange spørgsmål efter at blive sendt ud
+                p.version += 1
+                p.available_locations.remove(location)
+                p.save()
+
+            for rat in request.POST:
+                ratingId = rat[6:]
+                if ratingId.isdigit():
+                    ratingId = int(ratingId)
+                    val = int(request.POST.get(rat))
+
+                    try:
+                        r = Rating.objects.get(id=ratingId)
+                    except Rating.DoesNotExist:
+                        continue 
+                    r.value = r.value + val
+                    r.save()
+                    location.version += 1
+                    location.save()
+
        
         if a == 'close':
             for p in location.profiles.all():
@@ -614,6 +633,9 @@ def profile(request, id):
         if n != None:
             n = Note(text=n, profile=p)
             n.save()
+            profile.locked = True
+            profile.version +=1
+            profile.save()
         
             
         
@@ -689,7 +711,7 @@ def state(request):
     a = request.POST.get('action')
     if a == 'introOver':
         message = "Intro er started"
-        profs = list(Profile.objects.filter(active=True).all())
+        profs = list(Profile.objects.filter(active=True,location__isnull=False).all())
         
         def score(p):
             return len(p.available_locations.all())

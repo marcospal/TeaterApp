@@ -141,13 +141,19 @@ class Location(models.Model):
         #Add rooms own priority (handicap if you like)
         #print "we are adding a priority bonus of", self.priority
         score += self.priority
-        
+        actives = Profile.objects.filter(location=self, active=True).count()
         #if over minimum down prioritize room
         #TODO: probably syntax list len error
-        if len(list(self.aciveProfiles))>=self.capacity_min:
+        if actives>=self.capacity_min:
             score += settings.LOCATION_OVER_MINUMUM_SCORE
-        elif len(list(self.aciveProfiles))>0:
+        elif actives>0:
             score += settings.LOCATION_OVER_ONE_SCORE
+
+        #If there are very few free participants, try not to offer rooms they cannot fill
+        freeProfiles = len(list(Profile.objects.filter(active=True, location__isnull=True)))
+        if freeProfiles<settings.MIN_FREE_PROFILES_TO_OFFER_NEW_ROOMS:
+            if actives == 0 and self.capacity_min > 1: #if we can't fill it, then don't offer it
+                score += settings.MIN_FREE_PROFILES_TO_OFFER_NEW_ROOMS_SCORE
         #lower score if location has been visited before
         #try:
         #    qc = VisitCount.objects.get(profile=profile, location=self)
@@ -186,7 +192,6 @@ class Location(models.Model):
                     result = order
                 order = order+1
 
-
             if a.isEnding and order == 0:
                 return 0
             elif a.isEnding:
@@ -207,14 +212,12 @@ class Location(models.Model):
                 elif profile.state == Profile.ENDING:
                     if l.isEnding:
                         tmp.append(l)
-                elif l.safe:
-                    print profile.locked
-                    if not profile.locked:
+                elif profile.state == Profile.RUNNING:
+                    if l.safe and not l.isStartRoom and not l.isEnding:
                         tmp.append(l)
-                else:
-                    tmp.append(l)
+                    if  profile.locked and not l.safe:
+                        tmp.append(l)
 
-        #TODO: Virker det?
         tmp.sort(key=score)
         #tmp.reverse()
 
@@ -367,7 +370,8 @@ class Note(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     changed = models.DateTimeField(auto_now=True)
     text = models.TextField(max_length=256)
-    profile = models.ForeignKey(Profile, related_name='notes')
+    profile = models.ForeignKey(Profile, related_name='notes', blank=True, null=True)
+    location = models.ForeignKey(Location, related_name='notes', blank=True, null=True)
 
     def __unicode__(self):
         return "%s: %s" % (self.profile.name, self.text)

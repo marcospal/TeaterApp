@@ -8,6 +8,28 @@
 
     <h4>Status: {{ location|statestr }}</h4>
 
+{% if location.state == 0 %}
+        <p>
+           <form method="post" id="form" class="form-horizontal" role="form">
+                {% csrf_token %}
+                <input type="hidden" name="location" value="{{ location.id }}">
+                <button name="action" value="open" class="btn btn-primary">Åben lokation</button>
+                 <p>(Ingen deltagere bliver sendt denne vej før der er åbent)</p>
+            </form>
+            </p>
+{% endif %}
+{% if location.state != 0 %}
+         <p>
+           <form method="post" id="form" class="form-horizontal" role="form">
+                {% csrf_token %}
+                <input type="hidden" name="location" value="{{ location.id }}">
+                <button name="action" value="close" class="btn btn-primary">Luk lokation</button>
+                 <p>(Luk den, hvis lokationen ikke skal bruges mere)</p>
+            </form>
+        </p>
+{% endif %}
+<br/><br/>
+
     {% if location.state == 1 %}
         <p>
         Venter på deltagere.
@@ -55,34 +77,16 @@
            <form method="post" id="form" class="form-horizontal" role="form">
                 {% csrf_token %}
                 <input type="hidden" name="location" value="{{ location.id }}">
-                <button name="action" value="close" class="btn btn-primary">Send evaluering</button> 
+                <button name="action" value="evaluate" class="btn btn-primary">Send evaluering</button> 
                 <p>(De seneste deltagere kan ikke blive sendt til en ny lokation før du trykker send. Får spørgsmål til du er færdig.)</p>
-            </form>
+                <!--Hack: Forms ends after all the evaluation inputs fields-->
 
         {% endif %}
 
 
-        {% if location.state == 0 %}
-        <p>
-           <form method="post" id="form" class="form-horizontal" role="form">
-                {% csrf_token %}
-                <input type="hidden" name="location" value="{{ location.id }}">
-                <button name="action" value="open" class="btn btn-primary">Åben lokation</button>
-                 <p>(Ingen deltagere bliver sendt denne vej før der er åbent)</p>
-            </form>
-            </p>
-        {% endif %}
+       
 
-         {% if location.state != 0 %}
-         <p>
-           <form method="post" id="form" class="form-horizontal" role="form">
-                {% csrf_token %}
-                <input type="hidden" name="location" value="{{ location.id }}">
-                <button name="action" value="close" class="btn btn-primary">Luk lokation</button>
-                 <p>(Luk den, hvis lokationen ikke skal bruges mere)</p>
-            </form>
-        </p>
-        {% endif %}
+        
         
 
         
@@ -141,27 +145,40 @@
                         {% if location.state == 4 %}
                         <td>
 
-                        <button value="Vis" onclick="alert('Vis ratings');" />
-                        <table class="table" style="display:hidden;">
+                        <a class="colorbox-inline btn  btn-info" href="#box-scale-{{p.id}}">Evaluate</a>
+                        <div  style="display:none;">
+                        <div  style="background-color:#ffffff; padding:20px;" id="box-scale-{{p.id}}" >
+                        
+                         
+                        <table class="table table-bordered table-striped table-hover" >
+                        
                                 {% for r in p.rating_set.all %}
                                 <tr>
                                     <td>
                                         {{ r.scale.name }}:
                                     </td>
                                     <td>
-                                        <form method="post" id="form" class="form-horizontal" role="form">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="scale" value="{{ r.scale.id }}">
-                                            <INPUT type="submit" value="-" name="action"  class="btn btn-sm btn-warning"> 
-                                            {%comment%}{{ r.value }} {%endcomment%}   
-                                            <INPUT type="submit" value="+" name="action"  class="btn btn-sm btn-success"> 
-                                        </form>
+                                        
+                                            
+                                            
+                                            <a href="#scale-{{ r.id }}" class="btn btn-sm btn-success minus">-</a>
+                                            <input type="number" min="-2" max="2" value="0" id="scale-{{ r.id }}" name="scale-{{ r.id }}" readonly/> 
+                                            <a href="#scale-{{ r.id }}" class="btn btn-sm btn-warning plus">+</a> 
+                                            
+                                            
+                                       
 
                                         
                                     </td>
                                 </tr>
                                 {% endfor %}
+                               
+                                 
                             </table>
+                              <a href="#" class="btn btn-sm btn-info closeColorbox">Close</a> 
+                             </form>
+                        </div>
+                        </div>
 
                         {%comment%}
                             <form method="post" id="form" class="form-horizontal" role="form">
@@ -173,7 +190,7 @@
                                 <input type="hidden" name="location" value="{{ location.id }}">
 
                                 {{ p|scaleval:location.scale }}
-                                <INPUT type="submit" value="+" name="action"  class="btn btn-success"> 
+                                
                             </form>
                         {%endcomment%}
                         </td>
@@ -183,6 +200,45 @@
             {% endfor %}
         </table>
 
+<h4>Noter:</h4>
+
+    {% if location.notes.count > 0 %}
+
+    <table class="table table-bordered table-striped table-hover">
+        <tr>
+            <td>
+                Dato
+            </td>
+            <td>
+                Tekst
+            </td>
+        </tr>
+        {% for n in location.notes.all %}
+        <tr>
+            <td>
+                {{ n.date }}
+            </td>
+            <td>
+                {{ n.text }}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+
+    <form method="post" role="form" class="form-inline">
+   
+    <div class="row">
+     <div class="form-group col-xs-10">
+         {% csrf_token %}
+        <input type="textarea" name="note" value="" class="form-control">
+        </div>
+         <div class="form-group col-xs-2">
+        <button class="btn">Tilføj note</button>
+        </div>
+        </div>
+    </form>
+    <br/>
         
 
 
@@ -195,11 +251,34 @@
    
      $( document ).ready(function() {
 
+        $('.minus').click(function(event )
+        {
+            event.preventDefault();
+            var id = $( this ).attr( "href" );
+            $(id).val(Math.max(parseInt($(id).val())-1,-2)); 
+            
+        });
+
+        $('.plus').click(function(event )
+        {
+            event.preventDefault();
+            var id = $( this ).attr( "href" );
+            $(id).val(Math.min(parseInt($(id).val())+1,2)); 
+            
+        });
+        $('.closeColorbox').click(function(event )
+        {
+            event.preventDefault();
+            $('#cboxClose').click();
+        });
+
         setInterval(
         function()
         {
-            var d = new Date('{{location.first_arrived_time}}');
+            var d = new Date('{{location.first_arrived_time|date:"D, d M Y H:i:s"}}');
             var now = new Date();
+            //23. november 2013 02:39
+            //Sat Nov 23 2013 02:51:26 GMT+0100 (CET)
             var current = new Date(now-d);
             var format = current.getMinutes()+':'+current.getSeconds(); 
             $("#timeSinceFirstParticipant" ).text(format);
@@ -218,6 +297,13 @@
                 },'json');
         }, {{ AJAX_REFRESH_INTERVAL }});
 
+
+$(document).ready(function(){
+
+                $(".colorbox-inline").colorbox({inline:true, width:"30%"});
+                
+                
+            });
 
 {% endblock %}
 
