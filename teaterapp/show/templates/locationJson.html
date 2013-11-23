@@ -1,0 +1,133 @@
+{% load show_extras %}
+{
+   "version": {{location.version}},
+   "capacityContent": "Kapacitet: {{ location.profiles.count }} /  {{ location.capacity }}",
+   "notesIRummet": "
+   {% if location.notes.count > 0 %}
+    <table class=\"table table-bordered table-striped table-hover\">
+        <tr>
+            <td>
+                Dato
+            </td>
+            <td>
+                Tekst
+            </td>
+        </tr>
+        {% for n in location.notes.all %}
+        <tr>
+            <td>
+                {{ n.date }}
+            </td>
+            <td>
+                {{ n.text }}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    None
+    {% endif %}",
+
+   "tilskuereIRummet": "<table class=\"table table-bordered table-striped table-hover\">
+            <thead>
+            <tr>
+                <th>
+                    Navn
+                </th>
+                <th>
+                    Køn
+                </th>
+                <th>
+                    Alder
+                </th>
+                
+                <th>
+                    Noter/Låst
+                </th>
+                {% if location.state == 4 %}
+                    <th>
+                        Skala:
+                    </th>
+                {%endif%}
+             
+
+            </tr>
+            </thead>
+            {% for p in location.profiles.all %}
+                {% if p.active %}
+                    <tr>
+                        <td>                    
+                            <a href=\"/profile/{{p.id}}/\">{{p.name}}</a>
+                        <td>
+                            {{ p|gender }}
+                        </td>
+                        <td>
+                            {{p.age}}
+                        </td>
+                       
+                        <td>
+                            {% if p.locked %}
+                                Låst
+                            {% else %}
+
+                            {% endif %}
+                        </td>
+                        {% if location.state == 4 %}
+                        <td>
+
+                        <a class=\"colorbox-inline btn  btn-info\" href=\"#box-scale-{{p.id}}\">Evaluate</a>
+                        <div  style=\"display:none;\">
+                        <div  style=\"background-color:#ffffff; padding:20px;\" id=\"box-scale-{{p.id}}\" >
+                        
+                         
+                        <table class=\"table table-bordered table-striped table-hover\" >
+                        
+                                {% for r in p.rating_set.all %}
+                                <tr>
+                                    <td>
+                                        {{ r.scale.name }}:
+                                    </td>
+                                    <td>
+                                        
+                                            
+                                            
+                                            <a href=\"#scale-{{ r.id }}\" class=\"btn btn-sm btn-success minus\">-</a>
+                                            <input type=\"number\" min=\"-2\" max=\"2\" value=\"0\" id=\"scale-{{ r.id }}\" name=\"scale-{{ r.id }}\" readonly/> 
+                                            <a href=\"#scale-{{ r.id }}\" class=\"btn btn-sm btn-warning plus\">+</a> 
+                                            
+                                            
+                                       
+
+                                        
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                               
+                                 
+                            </table>
+                              <a href=\"#\" class=\"btn btn-sm btn-info closeColorbox\">Close</a> 
+                             </form>
+                        </div>
+                        </div>
+
+                        {%comment%}
+                            <form method=\"post\" id=\"form\" class=\"form-horizontal\" role=\"form\">
+                                {% csrf_token %}
+                                <input type=\"hidden\" name=\"profile\" value=\"{{ p.id }}\">
+                                
+                                <INPUT type=\"submit\" value=\"-\" name=\"action\"  class=\"btn btn btn-danger\"> 
+
+                                <input type=\"hidden\" name=\"location\" value=\"{{ location.id }}\">
+
+                                {{ p|scaleval:location.scale }}
+                                
+                            </form>
+                        {%endcomment%}
+                        </td>
+                    {% endif%}
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </table>
+</div>"
+}

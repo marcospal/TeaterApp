@@ -24,7 +24,7 @@
         
         <script src="{{ STATIC_URL }}js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
     </head>
-    <body class="bgcolor">
+    <body class="bgcolor" style="background-color:{%block bgcolor%}#ffffff{%endblock%}">
 
   <div class="container">
    <h1>Ord Mellem Rum</h1>
@@ -37,7 +37,7 @@
   {% endif %}
    <br/>
    </p>
-    <div class="well">
+    <div class="well" style="background-color:{%block bgcolorContainer%}#ffffff{%endblock%}">
       
 
         {%  block body  %}

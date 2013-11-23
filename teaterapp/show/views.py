@@ -559,10 +559,11 @@ def location(request, id):
             location.version += 1
             location.save()
         if a == 'firstParticipant':
-            location.first_arrived_time = datetime.datetime.now()
-            location.state = Location.FIRST_ARRIVED
-            location.version += 1
-            location.save()
+            if len(list(location.profiles.all())) >0:
+                location.first_arrived_time = datetime.datetime.now()
+                location.state = Location.FIRST_ARRIVED
+                location.version += 1
+                location.save()
         if a == 'evaluate':
             location.state = Location.EVALUATING
             location.version += 1
@@ -585,10 +586,12 @@ def locationversion(request, id):
         location = Location.objects.get(id=id)
     except:
         return HttpResponseRedirect('/')
-    return HttpResponse(simplejson.dumps(
-        {
-            'version': location.version
-        }), mimetype='application/json')
+
+    return render_to_response('locationJson.html', {'location':location}, context_instance=RequestContext(request))
+    #return HttpResponse(simplejson.dumps(
+    #    {
+    #        'version': location.version
+    #    }), mimetype='application/json')
     
 
 @staff_member_required
