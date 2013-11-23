@@ -1,0 +1,115 @@
+
+{% load show_extras %}
+{
+   "version": {{version}},
+   "freeParticipants": "<h4>Status: {{state}} </h4>
+    <h4>Frie tilskuere: ({{freeParticipants}} / {{allParticipants}}) </h4>
+    <table class=\"table table-bordered table-striped table-hover\">
+    <thead>
+        <tr>
+            <th>
+                Navn
+            </th>
+            <th>
+                Køn
+            </th>
+            <th>
+                Alder
+            </th>
+            <th>
+                Noter/Låst
+            </th>
+            <th>
+                Send til lokation
+            </th>
+            
+        </tr>
+        </thead>
+        {% for f in free_profiles%}
+            <tr {% if f.locked %} class=\"danger \"  {%endif%}>
+                <td>                    
+                     <a href=\"/profile/{{f.id}}/\">{{f.name}} </a>
+                <td>
+                    {{ f|gender }}
+                </td>
+                <td>
+                    {{f.age}}
+              
+                <td  {% if f.locked %} class=\"btn-danger\" {% endif %}>
+                    {% if f.locked %}
+                        <span class=\"glyphicon glyphicon-lock\"> Låst</span>
+
+                    {% endif %}
+                </td>
+                <td>
+                    <form method=\"post\" id=\"form\" class=\"form-horizontal\" role=\"form\">
+                        
+                        {% csrf_token %}
+                        
+                        <input type=\"hidden\" name=\"profile\" value=\"{{ f.id }}\" id=\"name\">
+                        <select name=\"location\">
+                        <option>Vælg en</option>
+                        {% for l in f.sendToOptions %}
+                            <option value=\"{{ l.id }}\">{{ l.name }}</option>
+                        {% endfor %}
+                        </select>
+                        <input type=\"submit\" class=\"btn btn-sm btn-warning\" value=\"Send!\">
+
+                        
+                    </form>
+                </td>
+                
+            </tr>
+        {% endfor %}
+    </table>",
+   "freeLocations": "<h3>Lokationer: (Åbne: {{openLocations}} / {{totalLocations}}) </h3>(Med intro lokation)
+
+    {% for l in locations%}
+    <h4><a href=\"/location/{{l.id}}/\">{{ l.name }} - {{ l|statestr}}</a> |  <small>({{ l.profiles.count }} /  {{ l.capacity }})</small>  | <small id=\"timeSinceFirst-{{l.id}}\"> 00:00</small></h4>
+
+    {%comment%}
+       <table class=\"table table-bordered table-striped table-hover\">
+       <thead>
+            <tr>
+                <th>
+                    Navn
+                </th>
+                <th>
+                    Køn
+                </th>
+                <th>
+                    Alder
+                </th>
+                
+                <th>
+                    Noter/Låst
+                </th>
+            </tr>
+            </thead>
+            {% for p in l.aciveProfiles.all %}
+                <tr {% if p.locked %} class=\"danger\" {%endif%}>
+                    <td>                    
+                        <a href=\"/profile/{{p.id}}/\">{{p.name}}</a>
+                    <td>
+                        {{ p|gender }}
+                    </td>
+                    <td>
+                        {{p.age}}
+                    </td>
+  
+
+                    <td  {% if p.locked %} class=\"btn-danger\" {% endif %}>
+                    {% if p.locked %}
+                        <span class=\"glyphicon glyphicon-lock\"> Låst</span>
+
+                    {% endif %}
+                </td>
+
+                   
+                </tr>
+            {% endfor %}
+        </table>
+        {%endcomment%}
+
+    {% endfor %}"
+}

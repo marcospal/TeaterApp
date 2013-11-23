@@ -403,7 +403,9 @@ def getOverviewVersion():
         v += l.version
     for p in Profile.objects.filter(active=True):
         v += p.version
+
     return v
+    
 
 
 @staff_member_required
@@ -469,10 +471,25 @@ def overview(request):
 
 @staff_member_required
 def overviewversion(request):
-    return HttpResponse(simplejson.dumps(
-        {
-            'version': getOverviewVersion()
-        }), mimetype='application/json')
+    profiles = Profile.objects.filter(active=True, location__isnull=True)
+    locations = Location.objects.all()
+    closedLocations = Location.objects.filter(state=Location.CLOSED)
+    allProfiles = Profile.objects.filter(active=True)
+    c = {
+        
+        'STATIC_URL': settings.STATIC_URL,
+        'title': "overview",
+        'locations': locations,
+        'free_profiles' : profiles,
+        'version': getOverviewVersion(),
+        'AJAX_REFRESH_INTERVAL' : settings.AJAX_REFRESH_INTERVAL,
+        'openLocations' : len(list(locations))-len(list(closedLocations)),
+        'totalLocations' : len(list(locations)) ,
+        'freeParticipants': len(profiles),
+        'allParticipants': len(allProfiles),
+        'state': state,
+    }
+    return render_to_response('overviewjson.html', c, context_instance=RequestContext(request))
     
 
 

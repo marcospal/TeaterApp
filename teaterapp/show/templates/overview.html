@@ -4,6 +4,7 @@
 {%if message%}
 <p> {{message}}</p>
 {%endif%}
+<div id="freeParticipants">
     <h4>Status: {{state}} </h4>
     <h4>Frie tilskuere: ({{freeParticipants}} / {{allParticipants}}) </h4>
     <table class="table table-bordered table-striped table-hover">
@@ -65,10 +66,10 @@
         {% endfor %}
     </table>
 
-
+</div>
     <br>
 
-    
+    <div id="freeLocations">
     <h3>Lokationer: (Åbne: {{openLocations}} / {{totalLocations}}) </h3>(Med intro lokation)
 
     {% for l in locations%}
@@ -120,7 +121,7 @@
      
 
     {% endfor %}
-
+</div>
 
 {% endblock %}
 
@@ -157,17 +158,28 @@ $( document ).ready(function() {
     {%endfor%}
 });
 
-    //Check version periodically
-    var intervalID = setInterval(
+        //Check version periodically
+        var intervalID = setInterval(
         function()
         { 
             $.get('/overview/version/', 
                 function(data)
-                { 
-                    if(data.version != {{version}})
-                        window.location.reload(); 
-                },'json');
+                {  
+                    
+                    text = data.replace(/(\r\n|\n|\r)/gm,"");
+                    jsonData = JSON.parse(text);
+                    if(jsonData.version != {{version}})
+                    {
+                        //TODO: Update to this view
+                       $('#freeParticipants').text(jsonData.freeParticipants);
+                       $('#freeLocations').html(jsonData.freeLocations);
+                       //$('#messages').html(jsonData.messages);
+                     
+                   }
+
+                });
         }, {{ AJAX_REFRESH_INTERVAL }});
+
 
 {% endblock %}
 
