@@ -136,6 +136,9 @@ class Location(models.Model):
         if n > 0:
             score /= n
 
+        if profile.location != None:
+            if profile.location.isEnding:
+                score -= 1000 #if it already got a room, then don't count it as part of the list any more.
         #print self.name, "___ profile vs room score is: ", score, "___ for ", profile
 
         #Add rooms own priority (handicap if you like)
