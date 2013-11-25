@@ -31,77 +31,6 @@ def validate(code):
             return -1
     except:
         return -1
-#This is the main entrypoint of the application
-def login(request):
-    error = ""
-    #if a code is submitted, use it to login
-    if request.POST.__contains__('code'):
-        #Force uppercase
-        code = request.POST["code"].upper()
-        #force alphanumeric
-        code = re.sub('\W', '', code)
-        
-        if validate(code)>=0:
-            #code is ok
-            user = None
-            try:
-                user = auth.models.User.objects.get(username__iexact=code)
-                print "user found: " + user.username
-            except auth.models.User.DoesNotExist:
-                user = auth.models.User.objects.create_user(code, "we@nouseema.il", code)
-                user.is_active=True    
-                user.save()
-            user = auth.authenticate(username=code, password=code)
-            auth.login(request, user)
-        else:
-            error = "Koden er ikke korrekt! Prøv igen."
-            
-    if request.user.is_authenticated():
-        if request.user.is_staff:
-            return HttpResponseRedirect('/overview/')
- 
-        #find profile for user
-        profile = None
-        try:
-            profile = Profile.objects.get(user=request.user, active=True)
-        except:
-            return HttpResponseRedirect('/baseinfo/')
-        
-        #User has profile decide what to do
-
-        #As long as actor is evaluating the profile we force him to take quizzes
-        if profile.location and profile.location.state == Location.EVALUATING:
-            return HttpResponseRedirect('/quiz/')
-        #user is assigned a location
-        if profile.location:
-            return HttpResponseRedirect('/directions/')
-        
-        #question is waiting
-        if profile.question or profile.force_questions > 0:
-            return HttpResponseRedirect('/quiz/')
-        
-        #what locations are possible?
-        locations = Location.getAvailableLocations(profile)
-        if len(locations) == 0:
-            return HttpResponseRedirect('/quiz/')
-        else:
-            #if len(locations) == 1:
-            #    #there is no choice, just send the guy
-            #    profile.location = locations[0]
-            #else:
-            #    #you have a choice
-            return HttpResponseRedirect('/choose/')
-        
-    c = {
-        'STATIC_URL': settings.STATIC_URL,
-        'title': "Login",
-        'error': error,
-        'test': request.user,
-           
-    }
-    return render_to_response('login.html', c, context_instance=RequestContext(request))
-
-
 def getName(code):
     codes = [(u"H.C. ANDERSEN", "M", "2490"),
     (u"Jorge Luis BORGES", "M", "9157"),
@@ -164,10 +93,87 @@ def getName(code):
     (u"Jane AAMUND", "F", "1581"),
     (u"Kirsten AAKJAER", "F", "0672")]
 
+
     for c in codes:
+        print c[2], " == ", code
         if c[2] == code:
             return c[0]
+    print "Ingen ens"
     return "Anders Andersen"
+
+#This is the main entrypoint of the application
+def login(request):
+    error = ""
+    #if a code is submitted, use it to login
+    if request.POST.__contains__('code'):
+        #Force uppercase
+        code = request.POST["code"].upper()
+        #force alphanumeric
+        code = re.sub('\W', '', code)
+        
+        if validate(code)>=0:
+            #code is ok
+            user = None
+            try:
+                user = auth.models.User.objects.get(username__iexact=code)
+                print "user found: " + user.username
+            except auth.models.User.DoesNotExist:
+                user = auth.models.User.objects.create_user(code, "teateruser@kanako.dk", code)
+                user.is_active=True    
+                user.save()
+            
+            user = auth.authenticate(username=code, password=code)
+            auth.login(request, user)
+        else:
+            error = "Koden er ikke korrekt! Prøv igen."
+            
+    if request.user.is_authenticated():
+        if request.user.is_staff:
+            return HttpResponseRedirect('/overview/')
+ 
+        #find profile for user
+        profile = None
+        try:
+            profile = Profile.objects.get(user=request.user, active=True)
+        except:
+            return HttpResponseRedirect('/baseinfo/')
+        
+        #User has profile decide what to do
+
+        #As long as actor is evaluating the profile we force him to take quizzes
+        if profile.location and profile.location.state == Location.EVALUATING:
+            return HttpResponseRedirect('/quiz/')
+        #user is assigned a location
+        if profile.location:
+            return HttpResponseRedirect('/directions/')
+        
+        #question is waiting
+        if profile.question or profile.force_questions > 0:
+            return HttpResponseRedirect('/quiz/')
+        
+        #what locations are possible?
+        locations = Location.getAvailableLocations(profile)
+        if len(locations) == 0:
+            return HttpResponseRedirect('/quiz/')
+        else:
+            #if len(locations) == 1:
+            #    #there is no choice, just send the guy
+            #    profile.location = locations[0]
+            #else:
+            #    #you have a choice
+            return HttpResponseRedirect('/choose/')
+        
+    c = {
+        'STATIC_URL': settings.STATIC_URL,
+        'title': "Login",
+        'error': error,
+        'test': request.user,
+           
+    }
+    return render_to_response('login.html', c, context_instance=RequestContext(request))
+
+
+
 
 def baseinfo(request):
     
@@ -191,7 +197,7 @@ def baseinfo(request):
     _code = request.POST.get('code')
     _sex = request.POST.get('sex')
     _age = request.POST.get('age') 
-    _name = getName(_code)
+    _name = getName(request.user.username)
     print _code, _sex, _age
     if _code != None and _sex != None and _age != None:
         print _code, _sex, _age
