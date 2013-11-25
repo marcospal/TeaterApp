@@ -197,7 +197,8 @@
                 {{ n.date }}
             </td>
             <td>
-                {% if n.profile %}<a href="/profile/{{n.profile.id}}/">{{ n.profile.name }}</a> {% endif %}
+                {% if n.profile %}(Tilskuer: <a href="/profile/{{n.profile.id}}/">{{ n.profile.name }} </a>):  {% endif %}
+                {% if n.location %}(Lokation: <a href="/location/{{n.location.id}}/">{{ n.location.name }}</a>):  {% endif %}
                 {{ n.text }}
             </td>
             

@@ -504,6 +504,9 @@ def overview(request):
             note = Note.objects.get(id=noteId)
             note.isRead = True
             note.save()
+            if note.location != None:
+                note.location.version += 1
+                note.location.save()
         except:
             print "could not find note"
             pass
@@ -572,6 +575,8 @@ def overviewversion(request):
     allProfiles = Profile.objects.filter(active=True)
     unreadNotes = Note.objects.filter(isRead=False,isActive=True)
     readNotes = Note.objects.filter(isRead=True,isActive=True)
+    for freeP in profiles:
+        freeP.sendToOptions = Location.getAvailableLocations(freeP)
 
     c = {
         
@@ -609,7 +614,7 @@ def location(request, id):
     a = request.POST.get('action')
     n = request.POST.get('note')
    
-    if n != None:
+    if n != None and len(n)>2:
         n = Note(text=n, location=location)
         n.save()
         location.version += 1
@@ -819,9 +824,7 @@ def reset(request):
             p.version += 1
             p.save()
         for n in Note.objects.all():
-            n.isActive = False
-            n.location = None
-            n.profile = None
+            n.delete()
         for l in Location.objects.all():
             l.state = Location.CLOSED
             l.save()

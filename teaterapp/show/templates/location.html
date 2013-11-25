@@ -214,6 +214,9 @@
             <td>
                 Tekst
             </td>
+            <td>
+                Read
+            </td>
         </tr>
         {% for n in location.notes.all %}
         <tr>
@@ -223,15 +226,24 @@
             <td>
                 {{ n.text }}
             </td>
+            <td>
+                {% if n.isRead %}
+                    Ja
+                {% else %}
+                    Nej
+                {% endif %}
+            </td>
         </tr>
         {% endfor %}
     </table>
     {% endif %}
 </div>
     <form method="post" role="form" class="form-inline">
-   
+   <p>(Du skal gerne sende dine noter efter at du har evalueret og kun hvis der er noget galt)</p>
     <div class="row">
+
      <div class="form-group col-xs-10">
+    
          {% csrf_token %}
         <input type="textarea" name="note" value="" class="form-control">
         </div>
@@ -244,7 +256,7 @@
         
 
 
-<a href="/locations/" class="btn btn-warning" style="margin-top:10px;">Oversigt </a>
+<a href="/locations/" class="btn btn-warning" style="margin-top:10px;">Oversigt </a> <br/> <br/>
     <a href="/" class="btn btn-warning" style="margin-top:10px;">Til Nullo oversigt</a>
 
 
