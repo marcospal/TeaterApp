@@ -82,6 +82,8 @@ class Location(models.Model):
     
     first_arrived_time = models.DateTimeField(default=datetime.datetime.now)
     def isOverTimeLimit(self):
+        if self.isEnding:
+            return False
         if self.state == Location.FIRST_ARRIVED:
             return (datetime.datetime.now()-self.first_arrived_time).seconds>4*60 #4 minutes time limit
         else:

@@ -676,8 +676,11 @@ def location(request, id):
             location.version += 1
             location.save()
         if a == 'start':
+            
             location.first_arrived_time = datetime.datetime.now()
             location.state = Location.IN_SESSION
+            
+
             location.version += 1
             location.save()
         if a == 'firstParticipant':
