@@ -819,9 +819,9 @@ def reset(request):
             p.version += 1
             p.save()
         for n in Note.objects.all():
-            note.isActive = False
-            note.location = None
-            note.profile = None
+            n.isActive = False
+            n.location = None
+            n.profile = None
         for l in Location.objects.all():
             l.state = Location.CLOSED
             l.save()
