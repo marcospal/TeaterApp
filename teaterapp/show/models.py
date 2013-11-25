@@ -373,6 +373,9 @@ class Note(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     changed = models.DateTimeField(auto_now=True)
     text = models.TextField(max_length=256)
+    isRead = models.BooleanField(default=False)
+    isActive = models.BooleanField(default=True)
+
     profile = models.ForeignKey(Profile, related_name='notes', blank=True, null=True)
     location = models.ForeignKey(Location, related_name='notes', blank=True, null=True)
 

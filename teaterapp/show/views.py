@@ -102,6 +102,8 @@ def login(request):
     return render_to_response('login.html', c, context_instance=RequestContext(request))
 
 
+def getName(code):
+    return "Anders Andersen"
 
 def baseinfo(request):
     
@@ -125,7 +127,7 @@ def baseinfo(request):
     _code = request.POST.get('code')
     _sex = request.POST.get('sex')
     _age = request.POST.get('age') 
-    _name = "Anders Andersen"
+    _name = getName(_code)
     print _code, _sex, _age
     if _code != None and _sex != None and _age != None:
         print _code, _sex, _age
@@ -405,20 +407,38 @@ def getOverviewVersion():
         v += p.version
 
     return v
-    
 
+
+@staff_member_required
+def locations(request):
+    locations = Location.objects.all()
+    c = {
+        'locations': locations,
+    }
+    return render_to_response('locations.html', c, context_instance=RequestContext(request))
 
 @staff_member_required
 def overview(request):
     
     locations = Location.objects.all()
 
-    print request.POST
 
     profile = request.POST.get("profile")
     location = request.POST.get("location")
 
-    
+    noteId = request.POST.get("readnote")
+
+    if noteId != None:
+        try:
+            
+            note = Note.objects.get(id=noteId)
+            note.isRead = True
+            note.save()
+        except:
+            print "could not find note"
+            pass
+
+
     if profile != None and location != None:
         try:
             profile = Profile.objects.get(id=profile)
@@ -450,8 +470,11 @@ def overview(request):
 
 
     closedLocations = Location.objects.filter(state=Location.CLOSED)
+    unreadNotes = Note.objects.filter(isRead=False,isActive=True)
+    readNotes = Note.objects.filter(isRead=True,isActive=True)
     for freeP in profiles:
         freeP.sendToOptions = Location.getAvailableLocations(freeP)
+
     c = {
         'profile' : profile,
         'STATIC_URL': settings.STATIC_URL,
@@ -464,6 +487,8 @@ def overview(request):
         'totalLocations' : len(list(locations)) ,
         'freeParticipants': len(profiles),
         'allParticipants': len(allProfiles),
+        'readNotes': readNotes,
+        'unreadNotes':unreadNotes,
         'state': state,
     }
     return render_to_response('overview.html', c, context_instance=RequestContext(request))
@@ -475,6 +500,9 @@ def overviewversion(request):
     locations = Location.objects.all()
     closedLocations = Location.objects.filter(state=Location.CLOSED)
     allProfiles = Profile.objects.filter(active=True)
+    unreadNotes = Note.objects.filter(isRead=False,isActive=True)
+    readNotes = Note.objects.filter(isRead=True,isActive=True)
+
     c = {
         
         'STATIC_URL': settings.STATIC_URL,
@@ -487,6 +515,8 @@ def overviewversion(request):
         'totalLocations' : len(list(locations)) ,
         'freeParticipants': len(profiles),
         'allParticipants': len(allProfiles),
+        'readNotes': readNotes,
+        'unreadNotes':unreadNotes,
         'state': state,
     }
     return render_to_response('overviewjson.html', c, context_instance=RequestContext(request))
@@ -718,6 +748,10 @@ def reset(request):
             p.location = None
             p.version += 1
             p.save()
+        for n in Note.objects.all():
+            note.isActive = False
+            note.location = None
+            note.profile = None
         for l in Location.objects.all():
             l.state = Location.CLOSED
             l.save()

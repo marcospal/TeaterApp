@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load show_extras %}
+{%block bgcolor%}#444444{%endblock%}"
+{%block bgcolorContainer%}#999999{%endblock%}
+{% block body %}
+    
+    <h2>Alle Lokationer</h2>
+{% for l in locations%}
+    <h4><a href="/location/{{l.id}}/">{{ l.name }} </a> </h4>
+{% endfor %}
+
+    <a href="/" class="btn btn-warning" style="margin-top:10px;">Til Nullo oversigt</a>
+
+
+{% endblock %}
+
+
+{% block javascript %}
+
+{% endblock %}
+
+
+{% block colorJS %}
+{%endblock%}
+

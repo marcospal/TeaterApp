@@ -14,6 +14,8 @@ urlpatterns = patterns('',
     url(r'^overview/version/$', 'teaterapp.show.views.overviewversion', name='overviewversion'),
     
     #Administrator location
+    url(r'^locations/$', 'teaterapp.show.views.locations', name='locations'),
+
     url(r'^location/(?P<id>\d+)/$', 'teaterapp.show.views.location', name='location'),
     url(r'^location/(?P<id>\d+)/version/$', 'teaterapp.show.views.locationversion', name='locationversion'),
 

@@ -52,32 +52,6 @@
 
     
 
-    <h4>Noter:</h4>
-
-    {% if profile.notes.count > 0 %}
-
-    <table class="table table-bordered table-striped table-hover">
-        <tr>
-            <td>
-                Dato
-            </td>
-            <td>
-                Tekst
-            </td>
-        </tr>
-        {% for n in profile.notes.all %}
-        <tr>
-            <td>
-                {{ n.date }}
-            </td>
-            <td>
-                {{ n.text }}
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
-    {% endif %}
-
     <form method="post" role="form" class="form-inline">
    
     <div class="row">

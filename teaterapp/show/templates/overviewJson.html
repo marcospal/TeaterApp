@@ -111,5 +111,79 @@
         </table>
         {%endcomment%}
 
-    {% endfor %}"
+    {% endfor %}",
+    "unreadNotes": "<h4>Ulæste Noter:</h4>
+
+    {% if unreadNotes.count > 0 %}
+
+    <table class=\"table table-bordered table-striped table-hover\">
+        <tr>
+            <td>
+                Dato
+            </td>
+            <td>
+                Tekst
+            
+            </td>
+            <td>
+                Ok
+            </td>
+        </tr>
+        {% for n in unreadNotes %}
+        <tr>
+            <td>
+                {{ n.date }}
+            </td>
+            <td>
+                {% if n.profile %}(Tilskuer: <a href=\"/profile/{{n.profile.id}}/\">{{ n.profile.name }} </a>):  {% endif %}
+                {% if n.location %}(Lokation: <a href=\"/location/{{n.location.id}}/\">{{ n.location.name }}</a>):  {% endif %}
+                {{ n.text }}
+            </td>
+            <td>
+             <form method=\"post\" id=\"form\" class=\"form-horizontal\" role=\"form\">
+                        
+                        {% csrf_token %}
+                        
+                        <input type=\"hidden\" name=\"readnote\" value=\"{{ n.id }}\">
+                        
+                        <input type=\"submit\" class=\"btn btn-sm btn-success\" value=\"OK!\">
+
+                        
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    Ingen noter.
+    {% endif %}",
+    "readNotes": "<h4>Læste Noter:</h4>
+
+    {% if readNotes.count > 0 %}
+
+    <table class=\"table table-bordered table-striped table-hover\">
+        <tr>
+            <td>
+                Dato
+            </td>
+            <td>
+                Tekst
+            
+            </td>
+            
+        </tr>
+        {% for n in readNotes %}
+        <tr>
+            <td>
+                {{ n.date }}
+            </td>
+            <td>
+                {% if n.profile %}<a href=\"/profile/{{n.profile.id}}/\">{{ n.profile.name }}</a> {% endif %}
+                {{ n.text }}
+            </td>
+            
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}"
 }
