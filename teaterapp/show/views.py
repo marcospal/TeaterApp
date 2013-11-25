@@ -95,10 +95,10 @@ def getName(code):
 
 
     for c in codes:
-        print c[2], " == ", code
+        #print c[2], " == ", code
         if c[2] == code:
             return c[0]
-    print "Ingen ens"
+    #print "Ingen ens"
     return "Anders Andersen"
 
 #This is the main entrypoint of the application
@@ -116,7 +116,7 @@ def login(request):
             user = None
             try:
                 user = auth.models.User.objects.get(username__iexact=code)
-                print "user found: " + user.username
+                #print "user found: " + user.username
             except auth.models.User.DoesNotExist:
                 user = auth.models.User.objects.create_user(code, "teateruser@kanako.dk", code)
                 user.is_active=True    
@@ -198,9 +198,9 @@ def baseinfo(request):
     _sex = request.POST.get('sex')
     _age = request.POST.get('age') 
     _name = getName(request.user.username)
-    print _code, _sex, _age
+    #print _code, _sex, _age
     if _code != None and _sex != None and _age != None:
-        print _code, _sex, _age
+        #print _code, _sex, _age
 
         for a,b in Profile.GENDERS:
             if b == _sex:
@@ -243,7 +243,7 @@ def quiz(request):
     profile = Profile.objects.filter(user=request.user, active=True)
     if profile.exists():
         profile = profile.get()
-        print "profile found"
+        #print "profile found"
     else:
         return HttpResponseRedirect('/')
     
@@ -328,12 +328,12 @@ def quiz(request):
         
 
         #print them
-        for s in questions:
-            print s, s.getscore(profile), s.profiles_that_have_answered.all()
+       # for s in questions:
+        #    print s, s.getscore(profile), s.profiles_that_have_answered.all()
 
         profile.question = questions[0]
         profile.save()
-        print "giving new question"
+        #print "giving new question"
     else:
         print "user already has question"
 
@@ -409,7 +409,7 @@ def directions(request):
     if profile.location == None:
         return HttpResponseRedirect('/')
 
-    print request.POST
+    #print request.POST
 
     done = request.POST.get("done")
 
@@ -602,7 +602,7 @@ def location(request, id):
         return HttpResponseRedirect('/')
 
 
-    print request.POST
+    #print request.POST
 
     #Allow location owner to adjust profile    
     p = request.POST.get('profile')
@@ -617,7 +617,7 @@ def location(request, id):
 
     if(a != None):
         
-        if a == 'evaluate':
+        if a == 'sendevaluation':
             location.state = Location.CLOSED
             location.version += 1
             location.save()
@@ -719,7 +719,7 @@ def profile(request, id):
     except:
         return HttpResponseRedirect('/')
 
-    print request.POST
+   # print request.POST
     
 
 
@@ -810,7 +810,7 @@ def profileversion(request, id):
 def reset(request):
     reset = request.POST.get('reset')
 
-    print request.POST
+    #print request.POST
     a = request.POST.get('action')
     if a == 'reset':
         for p in Profile.objects.all():

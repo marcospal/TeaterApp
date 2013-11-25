@@ -77,7 +77,7 @@
            <form method="post" id="form" class="form-horizontal" role="form">
                 {% csrf_token %}
                 <input type="hidden" name="location" value="{{ location.id }}">
-                <button name="action" value="evaluate" class="btn btn-primary">Send evaluering</button> 
+                <button name="action" value="sendevaluation" class="btn btn-primary">Send evaluering</button> 
                 <p>(De seneste tilskuere kan ikke blive sendt til en ny lokation før du trykker send. Får spørgsmål til du er færdig.)</p>
                 <!--Hack: Forms ends after all the evaluation inputs fields-->
 
