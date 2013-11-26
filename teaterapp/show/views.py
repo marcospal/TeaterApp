@@ -884,12 +884,13 @@ def state(request):
             locs = Location.getAvailableLocations(p)
             if len(locs)>0:
                 p.location = Location.getAvailableLocations(p)[0]
-                p.location.version + = 1
-                p.location.save()
             p.version += 1
             p.save()
         
         for l in Location.objects.all():
+            l.version += 1
+            l.save()
+            
             if l.isEnding:
                 l.state = Location.CLOSED
                 l.save()
