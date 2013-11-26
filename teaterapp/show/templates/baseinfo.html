@@ -35,7 +35,7 @@
         </div>
 
        
-
+<!--
         <div class="form-group">
         
            <label for="sex" class="col-sm-3 control-label">Køn:</label>
@@ -50,8 +50,9 @@
             </div>
 
         </div>
+    !-->
 
-        <INPUT type="submit" value="Videre" id="submitID"  class="btn btn-primary" disabled> 
+        <INPUT type="submit" value="Videre" id="submitID"  class="btn btn-primary" > 
     </form>
 
 {% endblock %}
@@ -59,46 +60,21 @@
 
 {% block javascript%}
 
-    //Populate year with 100 possibilities
-    for(var i = 2013; i > 1913;i--)
-    {
-        $("#yearID").append('<option value="'+i+'" onkeyup="update();">'+i+'</option>');
-    }
-    var months= ['Januar','Februar','Marts','April','Maj','Juni','Juli','September','Oktover','November','December']
-    for(var i = 1; i < months.length;i++)
-    {
-        $("#monthID").append('<option value="'+i+'" onkeyup="update();">'+months[i]+'</option>');
-    }
-
-    for(var i = 1; i <= 31;i++)
-    {
-        $("#dayID").append('<option value="'+i+'" onkeyup="update();">'+i+'</option>');
-    }
+   
 
 
     function update()
     {
-        var name = $("#nameID").val();
-        var year = $("#yearID").val();
-        var month = $("#monthID").val();
-        var day = $("#dayID").val();
-        var sex = $('input[name=sex]:checked', '#form').val();
-        
-        
-
-        if(day == "pick" || month == "pick" || year == "pick" || name.length == 0 || sex == undefined)
+        /*if(age)
         {
             $('#submitID').attr('disabled', 'disabled');
         }
         else
         {
             $('#submitID').removeAttr('disabled');
-        }
-
-
-        
+        }*/
     }
-    update();
+    //update();
     
 
     idleTime = 0;

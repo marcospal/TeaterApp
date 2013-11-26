@@ -19,9 +19,7 @@
             <th>
                 Noter/Låst
             </th>
-            <th>
-                Send til lokation
-            </th>
+           
             
         </tr>
         </thead>
@@ -41,23 +39,7 @@
 
                     {% endif %}
                 </td>
-                <td>
-                    <form method=\"post\" id=\"form\" class=\"form-horizontal\" role=\"form\">
-                        
-                        {% csrf_token %}
-                        
-                        <input type=\"hidden\" name=\"profile\" value=\"{{ f.id }}\" id=\"name\">
-                        <select name=\"location\">
-                        <option>Vælg en</option>
-                        {% for l in f.sendToOptions %}
-                            <option value=\"{{ l.id }}\">{{ l.name }}</option>
-                        {% endfor %}
-                        </select>
-                        <input type=\"submit\" class=\"btn btn-sm btn-warning\" value=\"Send!\">
-
-                        
-                    </form>
-                </td>
+                
                 
             </tr>
         {% endfor %}

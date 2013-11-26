@@ -1,27 +1,116 @@
 {% extends "base.html" %}
 {% load show_extras %}
+
+{% block header %}
+{% endblock %}
+
 {% block body %}
 
-    <table class="table table-bordered table-striped">
+    <table class="" style="margin:0; padding:0;" cellspacing="0" cellpadding="0" border="0">
         <thead>
         <tr>
-            <th>
-                Navn
+            <th style="width:400px;">
+                Navn <small>(på navnekiltet)</small>
             </th>
 
-            <th>
+            <th style="width:400px;">
                 Instruktion
             </th>
             </tr>
         </thead>
     {% for p in profiles %}
-        <tr style="padding-top:1px; padding-bottom:1px; margin-top:0px; margin-bottom:0px; ">
-            <td style="padding-top:1px; padding-bottom:1px; margin-top:0px; margin-bottom:0px; ">
-                <small>{{ p.name }}</small>
+        <tr style=" border-bottom:1px solid #888888; margin:0; padding:0; height:10px;">
+            <td style=" margin-top:0px; margin-bottom:0px;  height:10px;">
+                <small style="font-size:10px; margin:0; padding:0;">{{ p.name }}</small>
             </td>
            
-            <td>
-            <small>
+            <td style=" margin-top:0px; margin-bottom:0px;  height:10px;">
+            <small style="font-size:10px; margin:0; padding:0;">
+                {% if p.location %}
+                    Gå til {{ p.location.name }}
+                {% else %}
+                    Vent venligst
+                {% endif %}
+                </small>
+            </td>
+        </tr>
+    {% endfor %}
+     {% for p in profiles %}
+        <tr style=" border-bottom:1px solid #888888; margin:0; padding:0; height:10px;">
+            <td style=" margin-top:0px; margin-bottom:0px;  height:10px;">
+                <small style="font-size:10px; margin:0; padding:0;">{{ p.name }}</small>
+            </td>
+           
+            <td style=" margin-top:0px; margin-bottom:0px;  height:10px;">
+            <small style="font-size:10px; margin:0; padding:0;">
+                {% if p.location %}
+                    Gå til {{ p.location.name }}
+                {% else %}
+                    Log ind og besvar spørgeskemaet
+                {% endif %}
+                </small>
+            </td>
+        </tr>
+    {% endfor %}
+    {% for p in profiles %}
+        <tr style=" border-bottom:1px solid #888888; margin:0; padding:0; height:10px;">
+            <td style=" margin-top:0px; margin-bottom:0px;  height:10px;">
+                <small style="font-size:10px; margin:0; padding:0;">{{ p.name }}</small>
+            </td>
+           
+            <td style=" margin-top:0px; margin-bottom:0px;  height:10px;">
+            <small style="font-size:10px; margin:0; padding:0;">
+                {% if p.location %}
+                    Gå til {{ p.location.name }}
+                {% else %}
+                    Log ind og besvar spørgeskemaet
+                {% endif %}
+                </small>
+            </td>
+        </tr>
+    {% endfor %}
+    {% for p in profiles %}
+        <tr style=" border-bottom:1px solid #888888; margin:0; padding:0; height:10px;">
+            <td style=" margin-top:0px; margin-bottom:0px;  height:10px;">
+                <small style="font-size:10px; margin:0; padding:0;">{{ p.name }}</small>
+            </td>
+           
+            <td style=" margin-top:0px; margin-bottom:0px;  height:10px;">
+            <small style="font-size:10px; margin:0; padding:0;">
+                {% if p.location %}
+                    Gå til {{ p.location.name }}
+                {% else %}
+                    Log ind og besvar spørgeskemaet
+                {% endif %}
+                </small>
+            </td>
+        </tr>
+    {% endfor %}
+    {% for p in profiles %}
+        <tr style=" border-bottom:1px solid #888888; margin:0; padding:0; height:10px;">
+            <td style=" margin-top:0px; margin-bottom:0px;  height:10px;">
+                <small style="font-size:10px; margin:0; padding:0;">{{ p.name }}</small>
+            </td>
+           
+            <td style=" margin-top:0px; margin-bottom:0px;  height:10px;">
+            <small style="font-size:10px; margin:0; padding:0;">
+                {% if p.location %}
+                    Gå til {{ p.location.name }}
+                {% else %}
+                    Log ind og besvar spørgeskemaet
+                {% endif %}
+                </small>
+            </td>
+        </tr>
+    {% endfor %}
+    {% for p in profiles %}
+        <tr style=" border-bottom:1px solid #888888; margin:0; padding:0; height:10px;">
+            <td style=" margin-top:0px; margin-bottom:0px;  height:10px;">
+                <small style="font-size:10px; margin:0; padding:0;">{{ p.name }}</small>
+            </td>
+           
+            <td style=" margin-top:0px; margin-bottom:0px;  height:10px;">
+            <small style="font-size:10px; margin:0; padding:0;">
                 {% if p.location %}
                     Gå til {{ p.location.name }}
                 {% else %}
@@ -36,6 +125,8 @@
 
 {% endblock %}
 
+{% block footer %}
+{% endblock %}
 
 {% block javascript %}
     var intervalID = setInterval(function(){window.location.reload();}, {{ AJAX_REFRESH_INTERVAL }});

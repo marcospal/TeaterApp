@@ -24,28 +24,30 @@
         
         <script src="{{ STATIC_URL }}js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
     </head>
-    <body class="bgcolor" style="background-color:{%block bgcolor%}#ffffff{%endblock%}">
+    <body class="bgcolor" style="background-color:{%block bgcolor%}#ffffff{%endblock%}; padding-top:0px;">
 
-  <div class="container">
+  <div class="container" >
+  {% block header %}
    <h1>Ord Mellem Rum</h1>
    <p>
     {% if profile %}
-        <h4><strong>Du er:</strong> {{profile.name}} (login: {{profile.user.username}}) <a href="/logout/" class="btn btn-xs btn-danger"> Log ud </a></h4> 
+        <h4><strong>Du er:</strong> {{profile.name}} (login: {{profile.user.username}}) </h4> 
     
    {% elif user.is_authenticated %}
         <h4><strong>Du er:</strong> {{user.username}} <a href="/logout/" class="btn btn-xs btn-danger"> Log ud </a></h4>  
   {% endif %}
    <br/>
    </p>
-    <div class="well" style="background-color:{%block bgcolorContainer%}#ffffff{%endblock%}">
-      
+   
+    <div class="well" style="background-color:{%block bgcolorContainer%}#ffffff{%endblock%}; margin-top:20px;">
+     {% endblock %} 
 
         {%  block body  %}
         <p>Templates not loaded. </p>
       
         {% endblock  %}
         
-        
+        {% block footer %}
 
       </div>
  
@@ -54,11 +56,12 @@
 
 
       <hr>
-
+       
       <footer>
         <p>Cantabile 2 og Vordingborg Bibliotek  </p>
         <p>{% block adminarea %} {% endblock %}</p>
       </footer>
+      {% endblock %}
     </div> <!-- /container -->       
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
         <script>window.jQuery || document.write('<script src="{{ STATIC_URL }}js/vendor/jquery-1.10.1.min.js"><\/script>')</script>

@@ -194,7 +194,7 @@ class Location(models.Model):
             for other in otherProfiles:
                 #print "____sort___: "+str(order) +" > " + str(other)
                 if other.id == profile.id:
-                    result = order
+                    break
                 order = order+1
 
             if a.isEnding and order == 0:
@@ -202,7 +202,7 @@ class Location(models.Model):
             elif a.isEnding:
                 return 1000 # if it's ending but not first, then don't offer
 
-            return result
+            return order
         
 
        

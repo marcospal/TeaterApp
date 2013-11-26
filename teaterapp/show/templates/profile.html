@@ -50,8 +50,55 @@
         </tr>
     </table>
 
-    
+    <h4>Send til lokation:</h4>
+    <form method="post" id="form" class="form-horizontal" role="form">
+        
+        {% csrf_token %}
+        
+        <input type="hidden" name="profile" value="{{ profile.id }}" id="name">
+        <select name="location">
+        <option>Vælg en</option>
+        {% for l in profile.sendToOptions %}
+            <option value="{{ l.id }}">{{ l.name }}</option>
+        {% endfor %}
 
+        </select>
+        <input type="submit" class="btn btn-sm btn-warning" value="Send!">
+
+        
+    </form>
+              
+<h4>Noter:</h4>
+<table class=\"table table-bordered table-striped table-hover\">
+        <tr>
+            <td>
+                Dato
+            </td>
+            <td>
+                Tekst
+            </td>
+            <td>
+                Read
+            </td>
+        </tr>
+        {% for n in profile.notes.all %}
+        <tr>
+            <td>
+                {{ n.date }}
+            </td>
+            <td>
+                {{ n.text }}
+            </td>
+            <td>
+                {% if n.isRead %}
+                    Ja
+                {% else %}
+                    Nej
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
     <form method="post" role="form" class="form-inline">
    
     <div class="row">
@@ -67,6 +114,7 @@
     </form>
     <br/>
    
+
     <h4>Skalaer:</h4>
     <table class="table table-bordered table-striped table-hover">
         {% for r in profile.rating_set.all %}

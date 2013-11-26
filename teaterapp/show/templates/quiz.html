@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block body %}
+<em>Du skal svare på spørgsmålene før du kan g videre. </em>
 <p>
 {{ question.text }}
 </p>
@@ -15,10 +16,8 @@
     <center>
     {% for a in question.possible_answers.all %}
    
-         <INPUT class= "btn btn-primary btn-lg " style="margin-left:20px;" type="submit" value="{{ a.text }}" name="answer"/> 
-        
-         
-  
+         <INPUT class= "btn btn-primary btn-lg " style="margin-left:20px; margin-bottom:20px;" type="submit" value="{{ a.text }}" name="answer"/> 
+
     {% endfor %}
     </center>
     </div>

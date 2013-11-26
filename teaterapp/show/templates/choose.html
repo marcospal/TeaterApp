@@ -1,18 +1,19 @@
 {% extends "base.html" %}
 
 {% block body %}
+<p>{{msg}} </p>
+{% if chooseButFailed %}
+<br/>
+<a href="/" class= "btn btn-primary btn-lg btn-block " style="margin-top:20px; "> Okay <a/> 
+{% else %}
 <p>
 {% if choice.count == 1 %}
     Din næste lokation er: (vælg den for at forsætte)
 {% else %}
     
-    Vælg din næste lokation:
+    Computeren har nu udvalgt nogle lokationer du kan vælge i mellem. Vælg din næste lokation ved at klikke på den herunder. <br/> Du er næsten færdig, men du skal vente på at computeren siger at du må gå.
 {% endif %}
 </p>
-
-
-
-
 
     <form method="post">
     {% csrf_token %}
@@ -29,6 +30,7 @@
     </center>
 
     </form>
+{% endif %}
 <div class="clearfix"></div>
 {% endblock %}
 
