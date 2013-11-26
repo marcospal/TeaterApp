@@ -312,7 +312,8 @@ def quiz(request):
     #Find what question to ask
     if not profile.question:
         locCount = len(Location.getAvailableLocations(profile))
-        if (profile.force_questions <= 0 and locCount > 0) or profile.location != None:
+        isEvaluating = (profile.location != None and profile.location.state != EVALUATING)
+        if isEvaluating == False and ((profile.force_questions <= 0 and locCount > 0) or profile.location != None):
             profile.question = None
             profile.save()
             return HttpResponseRedirect('/')
