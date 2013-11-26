@@ -883,6 +883,8 @@ def state(request):
             locs = Location.getAvailableLocations(p)
             if len(locs)>0:
                 p.location = Location.getAvailableLocations(p)[0]
+                p.location.verion + = 1
+                p.location.save()
             p.version += 1
             p.save()
         
