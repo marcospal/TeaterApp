@@ -390,12 +390,14 @@ def choose(request):
 
     locations = Location.getAvailableLocations(profile)
     if not chooseButFailed and len(locations) == 1: #only one option
-        profile.location = locations[0]
+        newLoc = locations[0]
+        newLoc.version += 1
+        newLoc.save()
+        profile.location = newLoc
         profile.version += 1
         profile.location_set_time = datetime.datetime.now()
         profile.save()
-        profile.location.version += 1
-        profile.location.save()
+        
         return HttpResponseRedirect('/')
 
 
