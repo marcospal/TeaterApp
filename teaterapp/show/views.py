@@ -394,8 +394,8 @@ def choose(request):
         profile.version += 1
         profile.location_set_time = datetime.datetime.now()
         profile.save()
-        location.version += 1
-        location.save()
+        profile.location.version += 1
+        profile.location.save()
         return HttpResponseRedirect('/')
 
 
