@@ -407,7 +407,7 @@ def choose(request):
     #if request.POST["choice"]:
     msg = ""
     if chooseButFailed:
-        msg = "Lokationen blev desværre fyldt inden du valgte den. Du får i stedet nogle andre muligheder. "
+        msg = "Lokationen blev desværre fyldt inden du valgte den. Vi prøver igen. "
     if len(locations) == 0 and chooseButFailed:
         msg = "Lokationen blev desværre fyldt inden du valgte den. Vi arbejder på at finde en ny lokation til dig."
 

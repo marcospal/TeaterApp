@@ -224,7 +224,7 @@ class Location(models.Model):
                         tmp.append(l)
 
         tmp.sort(key=score)
-        #tmp.reverse()
+        tmp.reverse()
 
         #print them
         #for l in tmp:
