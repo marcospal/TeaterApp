@@ -210,7 +210,7 @@ def baseinfo(request):
         _locations = Location.objects.all()
         #print d
         profile = Profile(user=request.user, name=_name, age=_age, gender=_sex, force_questions=settings.USER_FORCED_QUESTIONS)
-        if Profile.objects.get(state=Profile.RUNNING, active=True).count()>0:
+        if Profile.objects.filter(state=Profile.RUNNING, active=True).count()>0:
             profile.state = Profile.RUNNING
         profile.save()
         profile.available_locations = _locations
