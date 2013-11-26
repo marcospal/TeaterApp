@@ -119,6 +119,10 @@ class Location(models.Model):
 
     def getscore(self, profile):
         score = 0
+        if self in profile.available_locations.all():
+            score += 0
+        else:
+            score -= 1000
         #print 
         #go through each parameter of room
         n = 0
@@ -184,23 +188,27 @@ class Location(models.Model):
 
             #score = a.getscore(profile)
             def otherSort(p):
-                return a.getscore(p)
+                p.tmp_score = a.getscore(p)
+                return p.tmp_score
             #get rank between all other profiles
             otherProfiles.sort(key=otherSort)
             otherProfiles.reverse()
             order = 0
             #print "______room>  "+str(a)
             result = 0
+            lastScore = 10000
             for other in otherProfiles:
                 #print "____sort___: "+str(order) +" > " + str(other)
                 if other.id == profile.id:
                     break
-                order = order+1
-
+                if other.tmp_score<lastScore:
+                    lastScore = other.tmp_score
+                    order = order+1
+            #print "RESULT____sort___: "+str(order) +" > " + str(other)
             if a.isEnding and order == 0:
                 return 0
             elif a.isEnding:
-                return 1000 # if it's ending but not first, then don't offer
+                return 600+order # if it's ending but not first, then don't offer
 
             return order
         
@@ -210,7 +218,7 @@ class Location(models.Model):
         tmp = []
         for l in list(locations):
             #print "Location score: "+ str(l.getscore(profile))
-            if l.capacity > l.visitor_count and l.getscore(profile)>=-100 and l.isOverTimeLimit() == False:
+            if l.capacity > l.visitor_count and l.isOverTimeLimit() == False:
                 if profile.state == Profile.INTRO:
                     if l.isStartRoom:
                         tmp.append(l)
@@ -224,7 +232,7 @@ class Location(models.Model):
                         tmp.append(l)
 
         tmp.sort(key=score)
-        tmp.reverse()
+        #tmp.reverse()
 
         #print them
         #for l in tmp:
