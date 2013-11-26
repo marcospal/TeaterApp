@@ -343,6 +343,8 @@ def quiz(request):
     else:
         print "user already has question"
 
+    if profile.question.possible_answers.all()[0].text == "Send":
+        profile.question.isText = True
 
     c = {
         'profile': profile,

@@ -16,11 +16,19 @@
     
     <div class="center-block">
     <center>
+    {% if question.isText %}
+    <textarea class="form-control" rows="5" style="margin-bottom:20px;" maxlength="400" ></textarea>
+
+        {% for a in question.possible_answers.all %}
+         <INPUT class= "btn btn-primary btn-lg " style="margin-left:20px; margin-bottom:20px;" type="submit" value="{{ a.text }}" name="answer"/> 
+          {% endfor %}
+    {% else %}
     {% for a in question.possible_answers.all %}
-   
+        
          <INPUT class= "btn btn-primary btn-lg " style="margin-left:20px; margin-bottom:20px;" type="submit" value="{{ a.text }}" name="answer"/> 
 
     {% endfor %}
+    {% endif %}
     </center>
     </div>
     
