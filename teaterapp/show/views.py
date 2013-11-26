@@ -312,7 +312,7 @@ def quiz(request):
     #Find what question to ask
     if not profile.question:
         locCount = len(Location.getAvailableLocations(profile))
-        isEvaluating = (profile.location != None and profile.location.state != EVALUATING)
+        isEvaluating = profile.location != None and profile.location.state != Location.EVALUATING
         if isEvaluating == False and ((profile.force_questions <= 0 and locCount > 0) or profile.location != None):
             profile.question = None
             profile.save()
@@ -884,7 +884,7 @@ def state(request):
             locs = Location.getAvailableLocations(p)
             if len(locs)>0:
                 p.location = Location.getAvailableLocations(p)[0]
-                p.location.verion + = 1
+                p.location.version + = 1
                 p.location.save()
             p.version += 1
             p.save()
