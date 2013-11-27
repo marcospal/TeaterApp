@@ -540,19 +540,7 @@ def overview(request):
             print "could not find note"
             pass
 
-
-    if profile != None and location != None:
-        try:
-            profile = Profile.objects.get(id=profile)
-            location = Location.objects.get(id=location)
-            profile.location = location
-            profile.version += 1
-            profile.save()
-            location.version += 1
-            location.save()
-
-        except:
-            pass
+    
 
     profiles = Profile.objects.filter(active=True, location__isnull=True)
     
@@ -706,12 +694,13 @@ def location(request, id):
                 location.save()
         if a == 'start':
             if location.state != Location.IN_SESSION:
-                location.first_arrived_time = datetime.datetime.now()
-                location.state = Location.IN_SESSION
-            
+                if (datetime.datetime.now()-location.first_arrived_time).seconds>5: #cannot start within the first 5 seconds. People tapped twice
+                    location.first_arrived_time = datetime.datetime.now()
+                    location.state = Location.IN_SESSION
+                
 
-                location.version += 1
-                location.save()
+                    location.version += 1
+                    location.save()
         if a == 'firstParticipant':
             if location.state != Location.FIRST_ARRIVED:
                 if len(list(location.profiles.all())) >0:
@@ -760,7 +749,18 @@ def profile(request, id):
    # print request.POST
     
 
-
+    location = request.POST.get("location")
+    if profile != None and location != None:
+        try:
+            
+            location = Location.objects.get(id=location)
+            profile.location = location
+            profile.version += 1
+            profile.save()
+            location.version += 1
+            location.save()
+        except:
+            pass
 
 
     #Allow location owner to adjust profile    
@@ -855,6 +855,7 @@ def reset(request):
     if a == 'reset':
         for p in Profile.objects.all():
             p.active = False
+            p.endLocation = None
             p.location = None
             p.version += 1
             p.save()
@@ -890,6 +891,7 @@ def state(request):
             p.save()
         
         for l in Location.objects.all():
+            l.show_opened = datetime.datetime.now()
             l.version += 1
             l.save()
 
@@ -904,16 +906,21 @@ def state(request):
 
     if a == 'startEnding':
         message = "Ending is started"
+
         for p in Profile.objects.all():
             p.state = Profile.ENDING
             p.save()
+            
         
         for l in Location.objects.all():
             if l.isEnding:
+
                 l.state = Location.OPEN_FOR_VISITORS
                 l.save()
-
-
+        for p in Profile.objects.all():
+            Location.getAvailableLocations(p)
+            p.save()
+        
         return HttpResponseRedirect('/overview')
 
     if a == 'undoEnding':

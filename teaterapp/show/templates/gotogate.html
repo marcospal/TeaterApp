@@ -6,36 +6,35 @@
 
 {% block body %}
 
-    <table class="" style="margin:0; padding:0;" cellspacing="0" cellpadding="0" border="0">
+    <table class="table-striped" style="margin:0; padding:0;" cellspacing="0" cellpadding="0" border="0">
         <thead>
         <tr>
-            <th style="width:400px;">
-                Navn <small>(på navnekiltet)</small>
+            <th style="width:300px; padding-left:20px;">
+                NAVN <small>(PÅ NAVNESKILTET)</small>
             </th>
 
-            <th style="width:400px;">
-                Instruktion
+            <th style="width:300px;">
+                INSTRUKTION
             </th>
             </tr>
         </thead>
     {% for p in profiles %}
-        <tr style=" border-bottom:1px solid #888888; margin:0; padding:0; height:10px;">
-            <td style=" margin-top:0px; margin-bottom:0px;  height:10px;">
-                <small style="font-size:10px; margin:0; padding:0;">{{ p.name }}</small>
+        <tr style=" border-bottom:2px solid #888888; margin:0; padding:0; height:10px;">
+            <td style=" margin-top:0px; margin-bottom:0px;  height:10px; padding-left:20px;">
+                <small style="font-size:10px; margin:0; padding:0; font-weight:500;" >{{ p.name|upper }}</small>
             </td>
            
             <td style=" margin-top:0px; margin-bottom:0px;  height:10px;">
-            <small style="font-size:10px; margin:0; padding:0;">
+            <small style=" font-size:10px; margin:0; padding:0;  font-weight:500;">
                 {% if p.location %}
-                    Gå til {{ p.location.name }}
+                    GÅ TIL {{ p.location.name|upper }}
                 {% else %}
-                    Vent venligst
+                    VENT VENLIGST
                 {% endif %}
                 </small>
             </td>
         </tr>
     {% endfor %}
-    
     </table>
 
 

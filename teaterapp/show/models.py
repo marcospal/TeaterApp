@@ -80,6 +80,9 @@ class Location(models.Model):
     #Is this location only for unlocked profiles
     safe = models.BooleanField(default=True, help_text='Skal vaere checked medmindre det er et kosteskab/venterum for folk der er laast.')
     
+    show_opened = models.DateTimeField(default=datetime.datetime.now)
+
+
     first_arrived_time = models.DateTimeField(default=datetime.datetime.now)
     def isOverTimeLimit(self):
         if self.isEnding:
@@ -176,6 +179,11 @@ class Location(models.Model):
 
     @staticmethod
     def getAvailableLocations(profile):
+        if profile.endLocation != None:
+            tmp = []
+            tmp.append(profile.endLocation)
+
+            return tmp
         #find all possible locations (OPEN_FOR_VISITORS, and available seats)
         #Q(income__gte=5000) | Q(income__isnull=True)
         locations = profile.available_locations.annotate(visitor_count=Count('profiles')).filter(Q(state=Location.OPEN_FOR_VISITORS) | Q(state=Location.FIRST_ARRIVED))
@@ -201,11 +209,17 @@ class Location(models.Model):
                 #print "____sort___: "+str(order) +" > " + str(other)
                 if other.id == profile.id:
                     break
+                if other.endLocation != None:
+                    continue
+
                 if other.tmp_score<lastScore:
                     lastScore = other.tmp_score
                     order = order+1
             #print "RESULT____sort___: "+str(order) +" > " + str(other)
             if a.isEnding and order == 0:
+
+                profile.endLocation = a
+                profile.save()
                 return 0
             elif a.isEnding:
                 return 600+order # if it's ending but not first, then don't offer
@@ -218,6 +232,8 @@ class Location(models.Model):
         tmp = []
         for l in list(locations):
             #print "Location score: "+ str(l.getscore(profile))
+            if l.capacity <= len(list(l.endProfiles.all())):
+                continue
             if l.capacity > l.visitor_count and l.isOverTimeLimit() == False:
                 if profile.state == Profile.INTRO:
                     if l.isStartRoom:
@@ -241,8 +257,7 @@ class Location(models.Model):
             #print 'Visitors: ',l.visitors.all()
             #print 'Visitors count: ',l.visitor_count
         maxOffered = settings.MAX_ROOM_OFFERED
-        if profile.state == Profile.ENDING:
-            maxOffered = 1
+        
 
         return tmp[0:maxOffered]
 
@@ -269,6 +284,7 @@ class Answer(models.Model):
 class Profile(models.Model):
     id = models.AutoField(primary_key=True)
     
+    endLocation = models.ForeignKey(Location, related_name='endProfiles', blank=True, null=True)
     #A Profile can be locked, so he is only sent to safe locations
     locked = models.BooleanField(default=False)
     

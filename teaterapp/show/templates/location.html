@@ -9,6 +9,9 @@
     <h4 id="capacityContent">Kapacitet: {{ location.profiles.count }} /  {{ location.capacity }}</h4>
 
     <h4>Status: {{ location|statestr }}</h4>
+    <h4 id="timesincestart">Tid siden show start: {{ location.show_opened|timesince }}</h4>
+
+    <a href="/location/{{location.id}}/" class="btn btn-sm btn-info"> Opdater </a>
 
 {% if location.state == 0 %}
         <p>
@@ -84,16 +87,6 @@
         {% endif %}
 
 
-       
-
-        
-        
-
-        
-        
-        
-
-
 
     <h3>Tilskuere i rummet:</h4>
 
@@ -104,9 +97,7 @@
                 <th>
                     Navn
                 </th>
-                <th>
-                    Køn
-                </th>
+               
                 <th>
                     Alder
                 </th>
@@ -127,10 +118,8 @@
                 {% if p.active %}
                     <tr>
                         <td>                    
-                            <a href="/profile/{{p.id}}/">{{p.name}}</a>
-                        <td>
-                            {{ p|gender }}
-                        </td>
+                            {{p.name}}
+                       
                         <td>
                             {{p.age}}
                         </td>
@@ -301,6 +290,7 @@
         },300);
         
       });
+    window.currentVersion = {{location.version}}
     //Check version periodically
     var intervalID = setInterval(
         function()
@@ -312,14 +302,15 @@
                     
                     text = data.replace(/(\r\n|\n|\r)/gm,"");
                     jsonData = JSON.parse(text);
-                    console.log(jsonData);
-                    if(jsonData.version != {{location.version}})
+                    console.log('did update');
+                    $('#timesincestart').text(jsonData.timesincestart);
+                    if(jsonData.version != window.currentVersion)
                     {
-        
+                        window.currentVersion = jsonData.version;
                        $('#capacityContent').text(jsonData.capacityContent);
+                        
                        $('#tilskuereIRummet').html(jsonData.tilskuereIRummet);
                        $('#notesIRummet').html(jsonData.notesIRummet);
-                     
                    }
 
                 });
