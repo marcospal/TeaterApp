@@ -277,17 +277,7 @@
             $('#cboxClose').click();
         });
 
-        setInterval(
-        function()
-        {
-            var d = new Date('{{location.first_arrived_time|date:"D, d M Y H:i:s"}}');
-            var now = new Date();
-            //23. november 2013 02:39
-            //Sat Nov 23 2013 02:51:26 GMT+0100 (CET)
-            var current = new Date(now-d);
-            var format = current.getMinutes()+':'+current.getSeconds(); 
-            $("#timeSinceFirstParticipant" ).text(format);
-        },300);
+       
         
       });
     window.currentVersion = {{location.version}}
@@ -304,6 +294,8 @@
                     jsonData = JSON.parse(text);
                     console.log('did update');
                     $('#timesincestart').text(jsonData.timesincestart);
+                    $('#timeSinceFirstParticipant').text(jsonData.timeSinceFirstParticipant);
+                    
                     if(jsonData.version != window.currentVersion)
                     {
                         window.currentVersion = jsonData.version;
