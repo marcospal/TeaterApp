@@ -156,6 +156,50 @@
     {% endfor %}
 </div>
 
+
+<h4>Alle deltagere:</h4>
+<table class="table table-bordered table-striped table-hover">
+    <thead>
+        <tr>
+            <th>
+                Navn
+            </th>
+            <th>
+                Køn
+            </th>
+            <th>
+                Alder
+            </th>
+            <th>
+                Noter/Låst
+            </th>
+           
+            
+        </tr>
+        </thead>
+        {% for f in allProfiles %}
+            <tr {% if f.locked %} class="danger "  {%endif%}>
+                <td>                    
+                     <a href="/profile/{{f.id}}/">{{f.name}} </a>
+                <td>
+                    {{ f|gender }}
+                </td>
+                <td>
+                    {{f.age}}
+              
+                <td  {% if f.locked %} class="btn-danger" {% endif %}>
+                    {% if f.locked %}
+                        <span class="glyphicon glyphicon-lock"> Låst</span>
+
+                    {% endif %}
+                </td>
+               
+                
+            </tr>
+        {% endfor %}
+    </table>
+
+
 <div id="readNotes" >
 
 <h4>Læste Noter:</h4>

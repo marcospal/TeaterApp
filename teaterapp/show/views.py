@@ -576,6 +576,7 @@ def overview(request):
         'totalLocations' : len(list(locations)) ,
         'freeParticipants': len(profiles),
         'allParticipants': len(allProfiles),
+        'allProfiles': allProfiles,
         'readNotes': readNotes,
         'unreadNotes':unreadNotes,
         'state': state,
@@ -937,7 +938,7 @@ def state(request):
                 l.state = Location.CLOSED
 
                 l.save()
-        
+
         return HttpResponseRedirect('/overview')
 
     return render_to_response('state.html', {}, context_instance=RequestContext(request))
