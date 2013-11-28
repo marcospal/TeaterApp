@@ -157,6 +157,44 @@
 </div>
 
 
+
+
+
+<div id="readNotes" >
+
+<h4>Læste Noter:</h4>
+
+    {% if readNotes.count > 0 %}
+
+    <table class="table table-bordered table-striped table-hover">
+        <tr>
+            <td>
+                Dato
+            </td>
+            <td>
+                Tekst
+            
+            </td>
+            
+        </tr>
+        {% for n in readNotes %}
+        <tr>
+            <td>
+                {{ n.date }}
+            </td>
+            <td>
+                {% if n.profile %}(Tilskuer: <a href="/profile/{{n.profile.id}}/">{{ n.profile.name }} </a>):  {% endif %}
+                {% if n.location %}(Lokation: <a href="/location/{{n.location.id}}/">{{ n.location.name }}</a>):  {% endif %}
+                {{ n.text }}
+            </td>
+            
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+</div>
+
+
 <h4>Alle deltagere:</h4>
 <table class="table table-bordered table-striped table-hover">
     <thead>
@@ -198,41 +236,6 @@
             </tr>
         {% endfor %}
     </table>
-
-
-<div id="readNotes" >
-
-<h4>Læste Noter:</h4>
-
-    {% if readNotes.count > 0 %}
-
-    <table class="table table-bordered table-striped table-hover">
-        <tr>
-            <td>
-                Dato
-            </td>
-            <td>
-                Tekst
-            
-            </td>
-            
-        </tr>
-        {% for n in readNotes %}
-        <tr>
-            <td>
-                {{ n.date }}
-            </td>
-            <td>
-                {% if n.profile %}(Tilskuer: <a href="/profile/{{n.profile.id}}/">{{ n.profile.name }} </a>):  {% endif %}
-                {% if n.location %}(Lokation: <a href="/location/{{n.location.id}}/">{{ n.location.name }}</a>):  {% endif %}
-                {{ n.text }}
-            </td>
-            
-        </tr>
-        {% endfor %}
-    </table>
-    {% endif %}
-</div>
 
 {% endblock %}
 
