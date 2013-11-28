@@ -216,11 +216,11 @@ class Location(models.Model):
                     lastScore = other.tmp_score
                     order = order+1
             #print "RESULT____sort___: "+str(order) +" > " + str(other)
-            if a.isEnding and order == 0:
-                if len(list(a.endProfiles.all()))==0:
-                    profile.endLocation = a
-                    profile.save()
-                    return 0
+            if a.isEnding and order == 0 and len(list(a.endProfiles.all())) == 0:
+                profile.endLocation = a
+                profile.save()
+                return 0
+
             elif a.isEnding:
                 return 600+order # if it's ending but not first, then don't offer
 
