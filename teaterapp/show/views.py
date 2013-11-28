@@ -920,18 +920,22 @@ def state(request):
         for p in Profile.objects.all():
             Location.getAvailableLocations(p)
             p.save()
-        
+
         return HttpResponseRedirect('/overview')
 
     if a == 'undoEnding':
         message = "Back to normal"
         for p in Profile.objects.all():
             p.state = Profile.RUNNING
+            
+            for l in p.endLocations.all():
+                p.endLocations.all().remove(l)
             p.save()
         
         for l in Location.objects.all():
             if l.isEnding:
                 l.state = Location.CLOSED
+
                 l.save()
         return HttpResponseRedirect('/overview')
 
