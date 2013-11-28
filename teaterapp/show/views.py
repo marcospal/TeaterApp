@@ -928,8 +928,8 @@ def state(request):
         for p in Profile.objects.all():
             p.state = Profile.RUNNING
             
-            for l in p.endLocations.all():
-                p.endLocations.all().remove(l)
+            
+            p.endLocation = None
             p.save()
         
         for l in Location.objects.all():
@@ -937,6 +937,7 @@ def state(request):
                 l.state = Location.CLOSED
 
                 l.save()
+        
         return HttpResponseRedirect('/overview')
 
     return render_to_response('state.html', {}, context_instance=RequestContext(request))
