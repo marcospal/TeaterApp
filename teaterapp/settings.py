@@ -85,6 +85,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     '/Users/jesper/TeaterApp/teaterapp/static/',
     '/Users/tim/Dev/TeaterApp/teaterapp/static/',
+    '/Users/marcospal/Downloads/ord_mellem_rum/ord_mellem_rum/contabile2test/TeaterApp/teaterapp/static/',
     #'/Users/jesper/TeaterApp/teaterapp/static',
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
@@ -127,6 +128,7 @@ WSGI_APPLICATION = 'teaterapp.wsgi.application'
 TEMPLATE_DIRS = (
     '/Users/jesper/TeaterApp/teaterapp/templates/',
     '/Users/tim/Dev/TeaterApp/teaterapp/templates/',
+    '/Users/marcospal/Downloads/ord_mellem_rum/ord_mellem_rum/contabile2test/TeaterApp/teaterapp/templates/',
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
