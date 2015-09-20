@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib import auth
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-#from dbjango.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse, Http404
@@ -15,7 +15,6 @@ import pdb
 import datetime
 from django.utils.timezone import utc
 from django.utils import simplejson
-import random
 
 from models import Profile, Question, Rating, QuestionCount, Location, Scale, Color, Note
 
@@ -144,9 +143,8 @@ def login(request):
         #As long as actor is evaluating the profile we force him to take quizzes
         if profile.location and profile.location.state == Location.EVALUATING:
             return HttpResponseRedirect('/quiz/')
-
         #user is assigned a location
-        if profile.location and profile.location.state != Location.CLOSED: #attempt to fix bug when people are sent back to same place
+        if profile.location:
             return HttpResponseRedirect('/directions/')
         
         #question is waiting
@@ -188,7 +186,7 @@ def baseinfo(request):
     profile = None 
     #lookup profile
     try:
-        profile = Profile.objects.get(user=request.user, active=True)
+        profile = Profile.objects.get(user=request.user, active=true)
         #profile exist
         return HttpResponseRedirect('/')
     except:
@@ -197,28 +195,23 @@ def baseinfo(request):
     
 
     _code = request.POST.get('code')
-    #_sex = request.POST.get('sex')
+    _sex = request.POST.get('sex')
     _age = request.POST.get('age') 
-    try:
-        _age = int(_age)
-    except:
-        _age = 30
-
     _name = getName(request.user.username)
     #print _code, _sex, _age
-    if _code != None and _age != None:
+    if _code != None and _sex != None and _age != None:
         #print _code, _sex, _age
-        _sex = None
+
         for a,b in Profile.GENDERS:
-            _sex = a
+            if b == _sex:
+                _sex = a
         
         #print _sex
 
         _locations = Location.objects.all()
         #print d
         profile = Profile(user=request.user, name=_name, age=_age, gender=_sex, force_questions=settings.USER_FORCED_QUESTIONS)
-        if Profile.objects.filter(state=Profile.RUNNING, active=True).count()>0:
-            profile.state = Profile.RUNNING
+        
         profile.save()
         profile.available_locations = _locations
         profile.save()
@@ -318,25 +311,18 @@ def quiz(request):
     
     #Find what question to ask
     if not profile.question:
-        locCount = len(Location.getAvailableLocations(profile))
-        isEvaluating = profile.location != None and profile.location.state == Location.EVALUATING
-        if isEvaluating == False and ((profile.force_questions <= 0 and locCount > 0) or profile.location != None):
+        if (profile.force_questions <= 0 and len(Location.getAvailableLocations(profile)) > 0) or profile.location != None:
             profile.question = None
             profile.save()
             return HttpResponseRedirect('/')
 
 
         #find all possible questions
-       
         questions = Question.objects.filter(leading_answer__isnull=True)
         
         #order them in relation to this profile
         def score(a):
-
-            s = a.getscore(profile)
-            if (locCount == 0 or isEvaluating) and a.priority>5:
-                s = s-10000
-            return s
+            return a.getscore(profile)
         questions = list(questions)
         questions.sort(key=score) #lowest score first
         
@@ -351,8 +337,6 @@ def quiz(request):
     else:
         print "user already has question"
 
-    if profile.question.possible_answers.all()[0].text == "Send":
-        profile.question.isText = True
 
     c = {
         'profile': profile,
@@ -379,7 +363,7 @@ def choose(request):
         return HttpResponseRedirect('/')
 
     location = request.POST.get("location")
-    chooseButFailed = False
+
     if location != None:
         location = Location.objects.filter(name=location)
         if location.exists():
@@ -394,38 +378,17 @@ def choose(request):
                 location.version += 1
                 location.save()
                 return HttpResponseRedirect('/')
-            else:
-                chooseButFailed = True
         else:
             print "unknown location"
 
     locations = Location.getAvailableLocations(profile)
-    if not chooseButFailed and len(locations) == 1: #only one option
-        newLoc = locations[0]
-        newLoc.version += 1
-        newLoc.save()
-        profile.location = newLoc
-        profile.version += 1
-        profile.location_set_time = datetime.datetime.now()
-        profile.save()
-        
-        return HttpResponseRedirect('/')
 
-
-    if not len(locations) > 0 and not chooseButFailed:
+    if not len(locations) > 0:
         return HttpResponseRedirect('/')
     #if request.POST["choice"]:
-    msg = ""
-    if chooseButFailed:
-        msg = "Lokationen blev desværre fyldt inden du valgte den. Vi prøver igen. "
-    if len(locations) == 0 and chooseButFailed:
-        msg = "Lokationen blev desværre fyldt inden du valgte den. Vi arbejder på at finde en ny lokation til dig."
-
     c = {
         'STATIC_URL': settings.STATIC_URL,
         'choice': locations,
-        'message': msg,
-        'chooseButFailed': chooseButFailed,
         'USER_TIMEOUT_SECONDS' : settings.USER_TIMEOUT_SECONDS,
         'AJAX_REFRESH_INTERVAL' : settings.AJAX_REFRESH_INTERVAL,
 
@@ -460,10 +423,10 @@ def directions(request):
         #qc.times += 1
         profile.available_locations.remove(profile.location)
 
-        #qc.save()
+        qc.save()
 
         profile.version += 1
-        profile.force_questions = 2
+        profile.force_questions = 5
         profile.save()
         profile.location.version+=1
         profile.location.save()
@@ -483,7 +446,7 @@ def directions(request):
         'profile' : profile,
         'age': age,
         'score': profile.location.getscore(profile),
-        'USER_TIMEOUT_SECONDS' : 30,
+        'USER_TIMEOUT_SECONDS' : settings.USER_TIMEOUT_SECONDS,
         'AJAX_REFRESH_INTERVAL' : settings.AJAX_REFRESH_INTERVAL,
         'USER_SELF_CONTINUE' : settings.USER_SELF_CONTINUE,
            
@@ -541,14 +504,23 @@ def overview(request):
             note = Note.objects.get(id=noteId)
             note.isRead = True
             note.save()
-            if note.location != None:
-                note.location.version += 1
-                note.location.save()
         except:
             print "could not find note"
             pass
 
-    
+
+    if profile != None and location != None:
+        try:
+            profile = Profile.objects.get(id=profile)
+            location = Location.objects.get(id=location)
+            profile.location = location
+            profile.version += 1
+            profile.save()
+            location.version += 1
+            location.save()
+
+        except:
+            pass
 
     profiles = Profile.objects.filter(active=True, location__isnull=True)
     
@@ -570,7 +542,8 @@ def overview(request):
     closedLocations = Location.objects.filter(state=Location.CLOSED)
     unreadNotes = Note.objects.filter(isRead=False,isActive=True)
     readNotes = Note.objects.filter(isRead=True,isActive=True)
-    
+    for freeP in profiles:
+        freeP.sendToOptions = Location.getAvailableLocations(freeP)
 
     c = {
         'profile' : profile,
@@ -584,7 +557,6 @@ def overview(request):
         'totalLocations' : len(list(locations)) ,
         'freeParticipants': len(profiles),
         'allParticipants': len(allProfiles),
-        'allProfiles': allProfiles,
         'readNotes': readNotes,
         'unreadNotes':unreadNotes,
         'state': state,
@@ -600,7 +572,6 @@ def overviewversion(request):
     allProfiles = Profile.objects.filter(active=True)
     unreadNotes = Note.objects.filter(isRead=False,isActive=True)
     readNotes = Note.objects.filter(isRead=True,isActive=True)
-    
 
     c = {
         
@@ -638,7 +609,7 @@ def location(request, id):
     a = request.POST.get('action')
     n = request.POST.get('note')
    
-    if n != None and len(n)>2:
+    if n != None:
         n = Note(text=n, location=location)
         n.save()
         location.version += 1
@@ -696,27 +667,20 @@ def location(request, id):
             location.version += 1
             location.save()
         if a == 'open':
-            if location.state != Location.OPEN_FOR_VISITORS:
-                location.state = Location.OPEN_FOR_VISITORS
+            location.state = Location.OPEN_FOR_VISITORS
+            location.version += 1
+            location.save()
+        if a == 'start':
+            location.first_arrived_time = datetime.datetime.now()
+            location.state = Location.IN_SESSION
+            location.version += 1
+            location.save()
+        if a == 'firstParticipant':
+            if len(list(location.profiles.all())) >0:
                 location.first_arrived_time = datetime.datetime.now()
+                location.state = Location.FIRST_ARRIVED
                 location.version += 1
                 location.save()
-        if a == 'start':
-            if location.state != Location.IN_SESSION:
-                if (datetime.datetime.now()-location.first_arrived_time).seconds>5: #cannot start within the first 5 seconds. People tapped twice
-                    location.first_arrived_time = datetime.datetime.now()
-                    location.state = Location.IN_SESSION
-                
-
-                    location.version += 1
-                    location.save()
-        if a == 'firstParticipant':
-            if location.state != Location.FIRST_ARRIVED:
-                if len(list(location.profiles.all())) >0:
-                    location.first_arrived_time = datetime.datetime.now()
-                    location.state = Location.FIRST_ARRIVED
-                    location.version += 1
-                    location.save()
         if a == 'evaluate':
             location.state = Location.EVALUATING
             location.version += 1
@@ -758,18 +722,7 @@ def profile(request, id):
    # print request.POST
     
 
-    location = request.POST.get("location")
-    if profile != None and location != None:
-        try:
-            
-            location = Location.objects.get(id=location)
-            profile.location = location
-            profile.version += 1
-            profile.save()
-            location.version += 1
-            location.save()
-        except:
-            pass
+
 
 
     #Allow location owner to adjust profile    
@@ -791,10 +744,6 @@ def profile(request, id):
             profile.locked = not profile.locked
             profile.version += 1
             profile.save()
-        if a == "delete_profile":
-            profile.active = False
-            profile.endLocation = None
-            profile.save()
 
     
     if p != None and p.isdigit():
@@ -804,7 +753,7 @@ def profile(request, id):
         if n != None:
             n = Note(text=n, profile=p)
             n.save()
-            #profile.locked = True
+            profile.locked = True
             profile.version +=1
             profile.save()
         
@@ -832,8 +781,6 @@ def profile(request, id):
                 profile.save()
 
     #prev = profile.locations.all()
-
-    profile.sendToOptions = Location.getAvailableLocations(profile)
 
     c = {
         'STATIC_URL': settings.STATIC_URL,
@@ -868,12 +815,13 @@ def reset(request):
     if a == 'reset':
         for p in Profile.objects.all():
             p.active = False
-            p.endLocation = None
             p.location = None
             p.version += 1
             p.save()
         for n in Note.objects.all():
-            n.delete()
+            n.isActive = False
+            n.location = None
+            n.profile = None
         for l in Location.objects.all():
             l.state = Location.CLOSED
             l.save()
@@ -887,31 +835,23 @@ def state(request):
     a = request.POST.get('action')
     if a == 'introOver':
         message = "Intro er started"
-        profs = list(Profile.objects.filter(active=True).all())
+        profs = list(Profile.objects.filter(active=True,location__isnull=False).all())
         
         def score(p):
             return len(p.available_locations.all())
-
-        random.shuffle(profs)
         profs.sort(key=score) #lowest score first
 
         for p in profs:
             p.state = Profile.RUNNING
             #Todo: Randomize, then fill one location at a time, 
             #Will fail if no locataions. sort by rating with lowest first. english should give -100
-            p.location = None
-            locs = Location.getAvailableLocations(p,True)
+            locs = Location.getAvailableLocations(p)
             if len(locs)>0:
-                p.location = locs[0]
-
+                p.location = Location.getAvailableLocations(p)[0]
             p.version += 1
             p.save()
         
         for l in Location.objects.all():
-            l.show_opened = datetime.datetime.now()
-            l.version += 1
-            l.save()
-
             if l.isEnding:
                 l.state = Location.CLOSED
                 l.save()
@@ -923,20 +863,15 @@ def state(request):
 
     if a == 'startEnding':
         message = "Ending is started"
-
         for p in Profile.objects.all():
             p.state = Profile.ENDING
             p.save()
-            
         
         for l in Location.objects.all():
             if l.isEnding:
-
                 l.state = Location.OPEN_FOR_VISITORS
                 l.save()
-        for p in Profile.objects.all():
-            Location.getAvailableLocations(p)
-            p.save()
+
 
         return HttpResponseRedirect('/overview')
 
@@ -944,17 +879,12 @@ def state(request):
         message = "Back to normal"
         for p in Profile.objects.all():
             p.state = Profile.RUNNING
-            
-            
-            p.endLocation = None
             p.save()
         
         for l in Location.objects.all():
             if l.isEnding:
                 l.state = Location.CLOSED
-
                 l.save()
-
         return HttpResponseRedirect('/overview')
 
     return render_to_response('state.html', {}, context_instance=RequestContext(request))

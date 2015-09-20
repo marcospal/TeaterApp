@@ -28,7 +28,7 @@
 
   <div class="container" >
   {% block header %}
-   <h1>Ord Mellem Rum</h1>
+   <h1 style="margin-top:60px;">Ord Mellem Rum</h1>
    <p>
     {% if profile %}
         <h4><strong>Du er:</strong> {{profile.name}} (login: {{profile.user.username}}) </h4> 
@@ -58,7 +58,7 @@
       <hr>
        
       <footer>
-        <p>Cantabile 2 og Vordingborg Bibliotek  </p> <a href="/logout/" class="btn btn-sm btn-danger"> Log ud </a>
+        <p>Cantabile 2 - Ord Mellem Rum </p> <a href="/logout/" class="btn btn-sm btn-danger"> Log ud </a>
         <p>{% block adminarea %} {% endblock %}</p>
       </footer>
       {% endblock %}

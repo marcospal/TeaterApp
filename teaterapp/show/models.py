@@ -120,7 +120,7 @@ class Location(models.Model):
     def aciveProfiles(self):
         return Profile.objects.filter(location=self, active=True)
 
-    def getscore(self, profile):
+    def getscore(self, profile, first = False):
         score = 0
         if self in profile.available_locations.all():
             score += 0
@@ -144,28 +144,34 @@ class Location(models.Model):
             n += 1
         if n > 0:
             score /= n
+        if first:
+            score /=6 #Should mean very little in the beginning
 
         if profile.location != None:
             if profile.location.isEnding:
                 score -= 1000 #if it already got a room, then don't count it as part of the top of the list any more.
+        
         #print self.name, "___ profile vs room score is: ", score, "___ for ", profile
 
         #Add rooms own priority (handicap if you like)
         #print "we are adding a priority bonus of", self.priority
-        score += self.priority
+        score -= self.priority*2
+        if first and self.priority>0:
+        	score -= 20
+
         actives = Profile.objects.filter(location=self, active=True).count()
         #if over minimum down prioritize room
         #TODO: probably syntax list len error
         if actives>=self.capacity_min:
-            score += settings.LOCATION_OVER_MINUMUM_SCORE
+            score -= settings.LOCATION_OVER_MINUMUM_SCORE
         elif actives>0:
-            score += settings.LOCATION_OVER_ONE_SCORE
+                score += settings.LOCATION_OVER_ONE_SCORE
 
         #If there are very few free participants, try not to offer rooms they cannot fill
         freeProfiles = len(list(Profile.objects.filter(active=True, location__isnull=True)))
         if freeProfiles<settings.MIN_FREE_PROFILES_TO_OFFER_NEW_ROOMS:
             if actives == 0 and self.capacity_min > 1: #if we can't fill it, then don't offer it
-                score += settings.MIN_FREE_PROFILES_TO_OFFER_NEW_ROOMS_SCORE
+                score -= settings.MIN_FREE_PROFILES_TO_OFFER_NEW_ROOMS_SCORE
         #lower score if location has been visited before
         #try:
         #    qc = VisitCount.objects.get(profile=profile, location=self)
@@ -178,7 +184,7 @@ class Location(models.Model):
         return score
 
     @staticmethod
-    def getAvailableLocations(profile):
+    def getAvailableLocations(profile,firstTime=False):
         if profile.endLocation != None:
             tmp = []
             tmp.append(profile.endLocation)
@@ -196,7 +202,7 @@ class Location(models.Model):
 
             #score = a.getscore(profile)
             def otherSort(p):
-                p.tmp_score = a.getscore(p)
+                p.tmp_score = a.getscore(p,firstTime)
                 return p.tmp_score
             #get rank between all other profiles
             otherProfiles.sort(key=otherSort)
@@ -216,7 +222,8 @@ class Location(models.Model):
                     lastScore = other.tmp_score
                     order = order+1
             #print "RESULT____sort___: "+str(order) +" > " + str(other)
-            if a.isEnding and order == 0 and len(list(a.endProfiles.all())) == 0:
+            if a.isEnding and order < 3 and len(list(a.endProfiles.all())) == 0 and a.capacity < 3:
+                
                 profile.endLocation = a
                 profile.save()
                 return 0
@@ -230,11 +237,13 @@ class Location(models.Model):
        
         #print "_________Locations: "
         tmp = []
+        
         for l in list(locations):
             #print "Location score: "+ str(l.getscore(profile))
+            
             if l.capacity <= len(list(l.endProfiles.all())):
                 continue
-            if l.capacity > l.visitor_count and l.isOverTimeLimit() == False:
+            if l.capacity > len(list(l.profiles.all())) and l.isOverTimeLimit() == False:
                 if profile.state == Profile.INTRO:
                     if l.isStartRoom:
                         tmp.append(l)
@@ -252,12 +261,25 @@ class Location(models.Model):
 
         #print them
         #for l in tmp:
-            #print l
-            #print 'Score', l.getscore(profile)
-            #print 'Visitors: ',l.visitors.all()
-            #print 'Visitors count: ',l.visitor_count
+        #    print l
+         #   print 'Score', l.getscore(profile)
+          #  print 'Visitors: ',l.visitors.all()
+           # print 'Visitors count: ',l.visitor_count
         maxOffered = settings.MAX_ROOM_OFFERED
         
+        #we could have added the endloation during this function call
+        if profile.endLocation != None:
+            tmp = []
+            tmp.append(profile.endLocation)
+
+            return tmp
+            
+        if profile.state == Profile.ENDING:
+	        if len(tmp)>0:
+	        	if tmp[0].isEnding and tmp[0].capacity < 5 and profile.endLocation != tmp[0]:
+	        		tmp.reverse()
+
+	       	return tmp[0:1]
 
         return tmp[0:maxOffered]
 

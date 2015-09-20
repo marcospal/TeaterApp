@@ -85,7 +85,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     '/Users/jesper/TeaterApp/teaterapp/static/',
     '/Users/tim/Dev/TeaterApp/teaterapp/static/',
-    '/Users/marcospal/Envs/TeaterApp/teaterapp/static/',
+    '/Users/marcospal/Envs/TeaterApp_git/teaterapp/static',
     #'/Users/jesper/TeaterApp/teaterapp/static',
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
@@ -128,7 +128,7 @@ WSGI_APPLICATION = 'teaterapp.wsgi.application'
 TEMPLATE_DIRS = (
     '/Users/jesper/TeaterApp/teaterapp/templates/',
     '/Users/tim/Dev/TeaterApp/teaterapp/templates/',
-    '/Users/marcospal/Envs/TeaterApp/teaterapp/templates/',
+    '/Users/marcospal/Envs/TeaterApp_git/teaterapp/templates',
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -183,7 +183,7 @@ LOGGING = {
 }
 
 
-LOCATION_OVER_ONE_SCORE = 6
-LOCATION_OVER_MINUMUM_SCORE = -100
+LOCATION_OVER_ONE_SCORE = 8
+LOCATION_OVER_MINUMUM_SCORE = 8
 MIN_FREE_PROFILES_TO_OFFER_NEW_ROOMS = 4
-MIN_FREE_PROFILES_TO_OFFER_NEW_ROOMS_SCORE = -20
+MIN_FREE_PROFILES_TO_OFFER_NEW_ROOMS_SCORE = 10

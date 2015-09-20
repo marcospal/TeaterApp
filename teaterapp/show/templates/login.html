@@ -10,15 +10,14 @@
 <p class="text-muted">
 
 Velkommen til Ord Mellem Rum, <br/>
-Du har fået tildelt en skilt, med en forfatters navn (som er nu dit navn i forestillingen) på forsiden, og en kode på bagsiden.
-Navnet og koden beskytter din anonymitet, når du besvarer personlige spørgsmål her ved computeren, eller i løbet af forestillingen.
+Du har fået tildelt et skilt med en forfatters navn på forsiden. Det er nu dit navn i forestillingen. På bagsiden er der en kode. Navnet beskytter din anonymitet, når du besvarer personlige spørgsmål her ved computeren, eller i løbet af forestillingen.
  <br> <br>
  Du skal ikke forlade computeren før den har fortalt dig hvor du skal hen. 
   <br> <br>
-Login her med din kode nu. (se bagsiden af dit navneskilt)</p>
+Login her med din personlige kode, som du finder bag på navneskiltet.</p>
     <form method="post">
         {% csrf_token %}
-        Dit login: <input type="text" name="code" id="codeID" maxlength="4" style="text-transform:uppercase;"/><br>
+        Din kode: <input type="text" name="code" id="codeID" maxlength="4" style="text-transform:uppercase;"/><br>
 
     <br/>
 

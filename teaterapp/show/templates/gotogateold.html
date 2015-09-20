@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load show_extras %}
+{% block body %}
+
+    <table class="table table-bordered table-striped">
+        <thead>
+        <tr>
+            <th>
+                Navn
+            </th>
+
+            <th>
+                Instruktion
+            </th>
+            </tr>
+        </thead>
+    {% for p in profiles %}
+        <tr style="padding-top:1px; padding-bottom:1px; margin-top:0px; margin-bottom:0px; ">
+            <td style="padding-top:1px; padding-bottom:1px; margin-top:0px; margin-bottom:0px; ">
+                <small>{{ p.name }}</small>
+            </td>
+           
+            <td>
+            <small>
+                {% if p.location %}
+                    Gå til {{ p.location.name }}
+                {% else %}
+                    Log ind og besvar spørgeskemaet
+                {% endif %}
+                </small>
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+
+
+{% endblock %}
+
+
+{% block javascript %}
+    var intervalID = setInterval(function(){window.location.reload();}, {{ AJAX_REFRESH_INTERVAL }});
+{% endblock %}
+
+{% block colorJS %}
+{% endblock %}
+

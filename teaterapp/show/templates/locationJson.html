@@ -2,10 +2,8 @@
 {
    "version": {{location.version}},
    "capacityContent": "Kapacitet: {{ location.profiles.count }} /  {{ location.capacity }}",
-   "timesincestart": "Tid siden show start: {{ location.show_opened|timesince }}",
-   "timeSinceFirstParticipant": "{{ location.first_arrived_time|timesince }}"
-   "notesIRummet": "{% if location.notes.count > 0 %}
-
+   "notesIRummet": "
+   {% if location.notes.count > 0 %}
     <table class=\"table table-bordered table-striped table-hover\">
         <tr>
             <td>
@@ -13,9 +11,6 @@
             </td>
             <td>
                 Tekst
-            </td>
-            <td>
-                Read
             </td>
         </tr>
         {% for n in location.notes.all %}
@@ -26,16 +21,11 @@
             <td>
                 {{ n.text }}
             </td>
-            <td>
-                {% if n.isRead %}
-                  <strong style=\"background-color:green;\">  Ja <strong>
-                {% else %}
-                    Nej
-                {% endif %}
-            </td>
         </tr>
         {% endfor %}
     </table>
+    {% else %}
+    None
     {% endif %}",
 
    "tilskuereIRummet": "<table class=\"table table-bordered table-striped table-hover\">
@@ -44,7 +34,9 @@
                 <th>
                     Navn
                 </th>
-               
+                <th>
+                    Køn
+                </th>
                 <th>
                     Alder
                 </th>
@@ -65,8 +57,10 @@
                 {% if p.active %}
                     <tr>
                         <td>                    
-                           {{p.name}}
-                   
+                            <a href=\"/profile/{{p.id}}/\">{{p.name}}</a>
+                        <td>
+                            {{ p|gender }}
+                        </td>
                         <td>
                             {{p.age}}
                         </td>

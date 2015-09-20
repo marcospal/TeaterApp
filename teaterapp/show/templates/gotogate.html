@@ -27,7 +27,12 @@
             <td style=" margin-top:0px; margin-bottom:0px;  height:10px;">
             <small style=" font-size:10px; margin:0; padding:0;  font-weight:500;">
                 {% if p.location %}
-                    GÅ TIL {{ p.location.name|upper }}
+                	{% if p.location.id = 19 %}
+                		VENT VENLIGST HER
+                	{% else %}
+                    	GÅ TIL {{ p.location.name|upper }}
+                    {% endif %}
+                
                 {% else %}
                     VENT VENLIGST
                 {% endif %}
