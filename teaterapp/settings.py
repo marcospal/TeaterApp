@@ -144,7 +144,7 @@ INSTALLED_APPS = (
     'locale',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
-    'south',
+    #'south',
     'teaterapp.show'
 
     # Uncomment the next line to enable admin documentation:
@@ -181,6 +181,8 @@ LOGGING = {
         },
     }
 }
+
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 
 LOCATION_OVER_ONE_SCORE = 8

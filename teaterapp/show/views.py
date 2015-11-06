@@ -14,7 +14,11 @@ import re
 import pdb
 import datetime
 from django.utils.timezone import utc
-from django.utils import simplejson
+#from django.utils import simplejson
+try:
+    import simplejson
+except ImportError:
+    import json as simplejson
 import random
 
 from models import Profile, Question, Rating, QuestionCount, Location, Scale, Color, Note
